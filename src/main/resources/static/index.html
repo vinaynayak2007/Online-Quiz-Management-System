@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuizPulse - Online Quiz Management System (Java & Firebase)</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-[#0b0f19] text-slate-100 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 bg-[#0f172a]/95 backdrop-blur border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="app.showTab('browse')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-amber-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-black text-xl">
+          Q
+        </div>
+        <div>
+          <span class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">QuizPulse</span>
+          <span class="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-900/60 text-indigo-300 border border-indigo-700/50">Java 21 + Firebase</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-1.5">
+        <button id="nav-browse" onclick="app.showTab('browse')" class="nav-btn active">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          Browse Quizzes
+        </button>
+        <button id="nav-leaderboard" onclick="app.showTab('leaderboard')" class="nav-btn">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+          Leaderboard
+        </button>
+        <button id="nav-history" onclick="app.showTab('history')" class="nav-btn">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          My History
+        </button>
+        <button id="nav-admin" onclick="app.showTab('admin')" class="nav-btn">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          Admin Portal
+        </button>
+      </nav>
+
+      <!-- Right Action Tools -->
+      <div class="flex items-center gap-3">
+        <!-- Firebase Status Pill -->
+        <button id="firebase-status-pill" onclick="app.openFirebaseModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/40 transition">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="firebase-pill-text">Firebase Ready</span>
+        </button>
+
+        <!-- Sound FX toggle -->
+        <button id="sound-toggle-btn" onclick="app.toggleSound()" class="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition" title="Toggle Sound FX">
+          <svg id="sound-icon-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+          <svg id="sound-icon-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- VIEW 1: BROWSE QUIZZES (STUDENT HOME) -->
+    <section id="view-browse" class="space-y-8">
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-900 border border-indigo-500/20 p-8 sm:p-10 shadow-2xl">
+        <div class="max-w-3xl space-y-4">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <span>⚡ Realtime Evaluated Assessments</span>
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Online Quiz Management System
+          </h1>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            Enterprise testing platform powered by modern Java 21, Spring Boot 3, and Google Cloud Firestore. Select an assessment below to begin timed evaluations with instant feedback.
+          </p>
+
+          <!-- Quick Stats Bar -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-800/80">
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <div class="text-2xl font-black text-indigo-400" id="stat-total-quizzes">4</div>
+              <div class="text-xs text-slate-400">Available Quizzes</div>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <div class="text-2xl font-black text-indigo-400" id="stat-total-questions">18</div>
+              <div class="text-xs text-slate-400">Questions Bank</div>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <div class="text-2xl font-black text-indigo-400" id="stat-total-attempts">1</div>
+              <div class="text-xs text-slate-400">Submissions Logged</div>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <div class="text-2xl font-black text-emerald-400" id="stat-avg-score">100%</div>
+              <div class="text-xs text-slate-400">Average Score</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between bg-slate-800/70 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <svg class="w-5 h-5 absolute left-3.5 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <input type="text" id="quiz-search-input" oninput="app.filterQuizzes()" placeholder="Search quizzes by topic, technology, or keywords..."
+                 class="w-full pl-11 pr-4 py-2.5 bg-slate-900/90 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder-slate-500">
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="flex flex-wrap items-center gap-3">
+          <select id="quiz-category-filter" onchange="app.filterQuizzes()" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="all">All Categories</option>
+          </select>
+
+          <select id="quiz-difficulty-filter" onchange="app.filterQuizzes()" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="all">All Difficulties</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+
+          <button onclick="app.startRandomQuiz()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/20 transition flex items-center gap-2">
+            <span>🎲 Random Quiz</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quizzes Grid -->
+      <div id="quizzes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically -->
+      </div>
+      <div id="no-quizzes-found" class="hidden text-center py-16 text-slate-400">
+        <p class="text-lg font-medium">No quizzes matched your search filter.</p>
+        <p class="text-sm text-slate-500 mt-1">Try resetting the filters or create a quiz via Admin Portal.</p>
+      </div>
+    </section>
+
+    <!-- VIEW 2: QUIZ RUNNER / PLAYER (ACTIVE TEST) -->
+    <section id="view-runner" class="hidden space-y-6 max-w-4xl mx-auto">
+      <div class="bg-slate-800/80 backdrop-blur rounded-2xl border border-slate-700/80 p-6 flex flex-wrap items-center justify-between gap-4 sticky top-20 z-30 shadow-xl">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="player-category-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Category</span>
+            <span id="player-difficulty-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-700 text-slate-300">Level</span>
+          </div>
+          <h2 id="player-quiz-title" class="text-xl sm:text-2xl font-bold text-white tracking-tight">Quiz Title</h2>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div id="player-timer-container" class="flex items-center gap-2 bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span id="player-timer-text" class="font-mono text-lg font-bold text-slate-100">10:00</span>
+          </div>
+
+          <button id="flag-btn" onclick="app.toggleFlagCurrentQuestion()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-amber-400 hover:border-amber-500/40 transition" title="Mark for review">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/50">
+        <div id="player-progress-bar" class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-2 rounded-full transition-all duration-300" style="width: 0%;"></div>
+      </div>
+
+      <div class="bg-slate-800/90 rounded-3xl border border-slate-700 p-6 sm:p-10 space-y-8 shadow-xl">
+        <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
+          <span id="player-question-counter" class="text-sm font-semibold text-indigo-400 tracking-wide uppercase">Question 1 of 5</span>
+          <span id="player-question-points" class="text-xs px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-medium">1 point</span>
+        </div>
+
+        <h3 id="player-question-text" class="text-xl sm:text-2xl font-bold text-white leading-relaxed">
+          Question prompt appears here?
+        </h3>
+
+        <div id="player-options-list" class="space-y-3"></div>
+
+        <div class="flex items-center justify-between pt-6 border-t border-slate-700/60">
+          <button id="player-prev-btn" onclick="app.prevQuestion()" class="px-5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold text-sm transition flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Previous
+          </button>
+
+          <button onclick="app.clearSelection()" class="text-xs text-slate-400 hover:text-slate-200 underline">
+            Clear selection
+          </button>
+
+          <div class="flex items-center gap-3">
+            <button id="player-next-btn" onclick="app.nextQuestion()" class="px-6 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold text-sm transition flex items-center gap-2">
+              Next
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+            <button id="player-submit-btn" onclick="app.confirmSubmitQuiz()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
+              <span>Submit Assessment</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-5 space-y-3">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span class="font-semibold uppercase tracking-wider">Question Navigator</span>
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Answered</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600"></span> Unanswered</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Flagged</span>
+          </div>
+        </div>
+        <div id="player-palette-grid" class="flex flex-wrap gap-2.5 pt-1"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: QUIZ RESULT & REVIEW -->
+    <section id="view-result" class="hidden space-y-8 max-w-4xl mx-auto">
+      <div id="result-banner-card" class="rounded-3xl border p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700">
+        <div class="space-y-4 max-w-xl mx-auto">
+          <div class="inline-flex items-center justify-center w-24 h-24 rounded-full border-4 text-4xl font-black mx-auto mb-2" id="result-grade-circle">
+            A+
+          </div>
+          <h2 id="result-status-title" class="text-3xl sm:text-4xl font-extrabold text-white">Quiz Passed!</h2>
+          <p id="result-status-subtitle" class="text-slate-300 text-base sm:text-lg">Outstanding work! You demonstrated solid command over this subject.</p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-slate-700/80">
+            <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/60">
+              <div id="result-score-text" class="text-2xl font-black text-indigo-400">0 / 0</div>
+              <div class="text-xs text-slate-400 font-medium">Score Points</div>
+            </div>
+            <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/60">
+              <div id="result-percent-text" class="text-2xl font-black text-emerald-400">0%</div>
+              <div class="text-xs text-slate-400 font-medium">Percentage</div>
+            </div>
+            <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/60">
+              <div id="result-time-text" class="text-2xl font-black text-amber-400">0s</div>
+              <div class="text-xs text-slate-400 font-medium">Time Taken</div>
+            </div>
+            <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/60">
+              <div id="result-accuracy-text" class="text-2xl font-black text-cyan-400">0 / 0</div>
+              <div class="text-xs text-slate-400 font-medium">Questions Correct</div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+            <button onclick="app.openCertificateModal()" class="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm shadow-xl shadow-amber-500/20 transition flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              View & Print Certificate
+            </button>
+            <button onclick="app.retakeCurrentQuiz()" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition">
+              Retake Quiz
+            </button>
+            <button onclick="app.showTab('browse')" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition">
+              Explore More Quizzes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold text-white">Comprehensive Question Breakdown</h3>
+          <span class="text-xs text-slate-400">Includes in-depth explanations & correct answers</span>
+        </div>
+        <div id="result-review-list" class="space-y-4"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: LEADERBOARD -->
+    <section id="view-leaderboard" class="hidden space-y-6 max-w-5xl mx-auto">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-800/80 p-6 rounded-2xl border border-slate-700/80">
+        <div>
+          <h2 class="text-2xl font-bold text-white">Hall of Fame & Leaderboard</h2>
+          <p class="text-slate-400 text-sm">Top scores achieved across live Firebase & system assessments</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <select id="leaderboard-quiz-filter" onchange="app.loadLeaderboard()" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-200">
+            <option value="all">All Quizzes Combined</option>
+          </select>
+          <button onclick="app.loadLeaderboard()" class="p-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200" title="Refresh">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 rounded-2xl border border-slate-700/60 overflow-hidden shadow-xl">
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="bg-slate-900/80 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="px-6 py-4">Rank</th>
+              <th class="px-6 py-4">Student</th>
+              <th class="px-6 py-4">Quiz Title</th>
+              <th class="px-6 py-4">Score</th>
+              <th class="px-6 py-4">Grade</th>
+              <th class="px-6 py-4">Time</th>
+              <th class="px-6 py-4">Date</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-table-body" class="divide-y divide-slate-700/60"></tbody>
+        </table>
+        <div id="leaderboard-empty" class="hidden text-center py-12 text-slate-400">
+          No attempts recorded yet. Be the first student to take a quiz!
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: STUDENT ATTEMPT HISTORY -->
+    <section id="view-history" class="hidden space-y-6 max-w-5xl mx-auto">
+      <div class="bg-slate-800/80 p-6 rounded-2xl border border-slate-700/80">
+        <h2 class="text-2xl font-bold text-white">My Assessment History</h2>
+        <p class="text-slate-400 text-sm">Review your past performance, grades, and completion records</p>
+      </div>
+
+      <div class="bg-slate-800/60 rounded-2xl border border-slate-700/60 overflow-hidden shadow-xl">
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="bg-slate-900/80 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="px-6 py-4">Date</th>
+              <th class="px-6 py-4">Quiz</th>
+              <th class="px-6 py-4">Student Name</th>
+              <th class="px-6 py-4">Score</th>
+              <th class="px-6 py-4">Percentage</th>
+              <th class="px-6 py-4">Status</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body" class="divide-y divide-slate-700/60"></tbody>
+        </table>
+        <div id="history-empty" class="hidden text-center py-12 text-slate-400">
+          No past quiz attempts found in this session. Take your first quiz!
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: ADMIN MANAGEMENT PORTAL -->
+    <section id="view-admin" class="hidden space-y-8 max-w-6xl mx-auto">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-800/80 p-6 rounded-2xl border border-slate-700/80">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-white">Admin Management Portal</h2>
+            <span class="px-2 py-0.5 rounded text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Privileged</span>
+          </div>
+          <p class="text-slate-400 text-sm">Create, manage, and monitor quizzes, question banks, and submissions</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="app.openQuizEditorModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Create New Quiz
+          </button>
+          <button onclick="app.resetSeedDataPrompt()" class="px-3.5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-sm font-medium transition" title="Restore sample quizzes">
+            ↺ Reset Seed Data
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700">
+          <div class="text-3xl font-extrabold text-indigo-400" id="admin-stat-quizzes">4</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Total Quizzes</div>
+        </div>
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700">
+          <div class="text-3xl font-extrabold text-indigo-400" id="admin-stat-questions">18</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Total Questions</div>
+        </div>
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700">
+          <div class="text-3xl font-extrabold text-emerald-400" id="admin-stat-attempts">1</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Submissions Handled</div>
+        </div>
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700">
+          <div class="text-3xl font-extrabold text-amber-400" id="admin-stat-passrate">100%</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Global Pass Rate</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 rounded-2xl border border-slate-700/60 overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+          <h3 class="font-bold text-white text-base">Quiz Catalog & Question Bank</h3>
+          <span class="text-xs text-slate-400">Manage questions, timer settings, and state</span>
+        </div>
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="bg-slate-900/80 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="px-6 py-4">Quiz Title</th>
+              <th class="px-6 py-4">Category</th>
+              <th class="px-6 py-4">Difficulty</th>
+              <th class="px-6 py-4">Questions</th>
+              <th class="px-6 py-4">Duration</th>
+              <th class="px-6 py-4">Passing %</th>
+              <th class="px-6 py-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-quizzes-table-body" class="divide-y divide-slate-700/60"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: PRE-QUIZ STUDENT INFO PROMPT -->
+  <div id="modal-student-info" class="modal-backdrop hidden">
+    <div class="modal-card max-w-md w-full bg-slate-800 rounded-3xl border border-slate-700 p-8 space-y-6 shadow-2xl">
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto text-xl font-bold">
+          ✍️
+        </div>
+        <h3 class="text-2xl font-bold text-white">Candidate Details</h3>
+        <p class="text-sm text-slate-400">Enter your details before beginning the assessment. These will be printed on your completion certificate.</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Full Name *</label>
+          <input type="text" id="student-name-input" value="Vinay Nayak" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Email Address (Optional)</label>
+          <input type="email" id="student-email-input" placeholder="e.g. vinay@example.com" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button onclick="app.closeStudentModal()" class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm font-semibold text-slate-200 transition">
+          Cancel
+        </button>
+        <button onclick="app.launchQuizPlayer()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition">
+          Start Quiz Now 🚀
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: QUIZ CREATOR / EDITOR (ADMIN) -->
+  <div id="modal-quiz-editor" class="modal-backdrop hidden">
+    <div class="modal-card max-w-4xl w-full bg-slate-800 rounded-3xl border border-slate-700 p-6 sm:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div>
+          <h3 id="quiz-editor-modal-title" class="text-2xl font-bold text-white">Create New Assessment</h3>
+          <p class="text-xs text-slate-400">Configure quiz metadata, duration, questions, and explanations</p>
+        </div>
+        <button onclick="app.closeQuizEditorModal()" class="text-slate-400 hover:text-white p-2">✕</button>
+      </div>
+
+      <input type="hidden" id="editor-quiz-id">
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Quiz Title *</label>
+          <input type="text" id="editor-title" placeholder="e.g. Advanced Java & Spring Boot Architecture" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Description</label>
+          <textarea id="editor-description" rows="2" placeholder="Brief summary of what this quiz covers..." class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Category *</label>
+          <input type="text" id="editor-category" placeholder="e.g. Java, Firebase, Algorithms" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Difficulty</label>
+          <select id="editor-difficulty" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate" selected>Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Duration (Minutes)</label>
+          <input type="number" id="editor-duration" value="10" min="1" max="180" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Passing Threshold (%)</label>
+          <input type="number" id="editor-passing" value="60" min="10" max="100" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+        </div>
+      </div>
+
+      <div class="border-t border-slate-700 pt-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>Questions Bank</span>
+            <span id="editor-question-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-indigo-500/20 text-indigo-300">0 questions</span>
+          </h4>
+          <button type="button" onclick="app.addEditorQuestion()" class="px-3.5 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-xs font-bold text-white transition flex items-center gap-1.5">
+            + Add Question
+          </button>
+        </div>
+
+        <div id="editor-questions-container" class="space-y-6"></div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-700">
+        <button type="button" onclick="app.closeQuizEditorModal()" class="px-5 py-2.5 rounded-xl bg-slate-700 text-slate-300 font-semibold text-sm hover:bg-slate-600 transition">
+          Cancel
+        </button>
+        <button type="button" onclick="app.saveQuizFromEditor()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition">
+          Save Quiz & Publish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FIREBASE CONFIG & CLOUD STATUS -->
+  <div id="modal-firebase" class="modal-backdrop hidden">
+    <div class="modal-card max-w-xl w-full bg-slate-800 rounded-3xl border border-slate-700 p-8 space-y-6 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🔥</span>
+          <h3 class="text-xl font-bold text-white">Google Firebase Integration</h3>
+        </div>
+        <button onclick="app.closeFirebaseModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <div class="bg-slate-900/90 rounded-2xl p-5 border border-slate-700 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Active Mode</span>
+          <span id="fb-modal-mode" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300">LOCAL EMULATOR</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Database Type</span>
+          <span id="fb-modal-db" class="text-xs text-slate-200 font-mono">Cloud Firestore</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Project ID</span>
+          <span id="fb-modal-project" class="text-xs text-slate-200 font-mono">quiz-system-demo</span>
+        </div>
+        <p id="fb-modal-message" class="text-xs text-slate-400 pt-2 border-t border-slate-800 leading-relaxed"></p>
+      </div>
+
+      <div class="space-y-3">
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Connect Your Own Firebase Service Account:
+        </label>
+        <p class="text-xs text-slate-400">
+          Paste your Firebase private key JSON (<code class="bg-slate-900 px-1 py-0.5 rounded text-amber-300">serviceAccountKey.json</code>):
+        </p>
+        <textarea id="firebase-credentials-input" rows="4" placeholder='{"type": "service_account", "project_id": "your-quiz-app", ...}'
+                  class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl font-mono text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="app.closeFirebaseModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-200 transition">
+          Close
+        </button>
+        <button onclick="app.submitFirebaseConfig()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 rounded-xl text-xs font-bold text-slate-950 transition">
+          Apply Firebase Credentials
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PRINTABLE CERTIFICATE OF COMPLETION -->
+  <div id="modal-certificate" class="modal-backdrop hidden">
+    <div class="modal-card max-w-2xl w-full bg-slate-900 rounded-3xl border border-slate-700 p-8 space-y-6 shadow-2xl">
+      <div class="flex items-center justify-between print:hidden">
+        <h3 class="text-lg font-bold text-white">Certificate Preview</h3>
+        <button onclick="app.closeCertificateModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <div id="certificate-print-area" class="bg-gradient-to-br from-amber-50 via-white to-amber-50 text-slate-900 p-10 rounded-2xl border-8 border-double border-amber-600/60 shadow-2xl relative text-center space-y-6">
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-widest text-amber-700 font-extrabold">Online Quiz Management System</div>
+          <h2 class="text-3xl font-serif font-black tracking-wide text-slate-900">CERTIFICATE OF ACHIEVEMENT</h2>
+          <div class="text-xs text-slate-600">This official certificate is proudly awarded to:</div>
+        </div>
+
+        <div class="border-b-2 border-amber-600/40 pb-2 max-w-md mx-auto">
+          <div id="cert-student-name" class="text-3xl font-serif font-extrabold text-indigo-950 tracking-wide">Vinay Nayak</div>
+        </div>
+
+        <p class="text-sm text-slate-700 max-w-lg mx-auto leading-relaxed">
+          For successfully passing the comprehensive assessment in <br>
+          <span id="cert-quiz-title" class="font-bold text-slate-900 text-base">Java & Object-Oriented Programming</span>
+        </p>
+
+        <div class="flex items-center justify-around pt-4 border-t border-amber-200">
+          <div>
+            <div id="cert-score-percent" class="text-2xl font-black text-amber-700">95%</div>
+            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Score Achieved</div>
+          </div>
+          <div>
+            <div id="cert-date" class="text-sm font-semibold text-slate-800">October 24, 2026</div>
+            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Date of Issue</div>
+          </div>
+          <div>
+            <div id="cert-hash" class="text-xs font-mono font-bold text-indigo-900">QP-9B214F</div>
+            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Verification ID</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 print:hidden">
+        <button onclick="app.closeCertificateModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300 transition">
+          Close
+        </button>
+        <button onclick="window.print()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white transition flex items-center gap-1.5">
+          🖨️ Print / Save as PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+    <span id="toast-icon">ℹ️</span>
+    <span id="toast-message" class="text-sm font-medium">Notification message</span>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

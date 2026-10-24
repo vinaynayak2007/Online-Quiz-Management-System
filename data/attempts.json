@@ -1,0 +1,19 @@
+[ {
+  "id" : "att-256cccb2",
+  "quizId" : "quiz-java-core",
+  "quizTitle" : "Java & Object-Oriented Programming",
+  "category" : "Java",
+  "studentName" : "Test Student",
+  "studentEmail" : "student@test.com",
+  "score" : 2,
+  "totalPoints" : 10,
+  "percentage" : 20.0,
+  "grade" : "F",
+  "passed" : false,
+  "timeSpentSeconds" : 45,
+  "timestamp" : 1792806491842,
+  "answers" : [ {
+    "questionId" : "q-j1",
+    "selectedOptions" : [ 1 ]
+  } ]
+} ]
