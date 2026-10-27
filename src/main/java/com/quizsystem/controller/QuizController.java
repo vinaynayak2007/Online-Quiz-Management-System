@@ -77,6 +77,80 @@ public class QuizController {
         }
     }
 
+    // --- QUESTION LEVEL ENDPOINTS ---
+
+    @GetMapping("/{quizId}/questions")
+    public ResponseEntity<List<com.quizsystem.model.Question>> getQuestionsForQuiz(@PathVariable String quizId) {
+        return ResponseEntity.ok(quizService.getQuestionsForAdmin(quizId));
+    }
+
+    @GetMapping("/{quizId}/questions/{questionId}")
+    public ResponseEntity<?> getQuestion(@PathVariable String quizId, @PathVariable String questionId) {
+        return quizService.getQuestion(quizId, questionId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{quizId}/questions")
+    public ResponseEntity<?> addQuestion(@PathVariable String quizId, @RequestBody com.quizsystem.model.Question question) {
+        return quizService.addQuestion(quizId, question)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{quizId}/questions/{questionId}")
+    public ResponseEntity<?> updateQuestion(
+            @PathVariable String quizId,
+            @PathVariable String questionId,
+            @RequestBody com.quizsystem.model.Question question) {
+        return quizService.updateQuestion(quizId, questionId, question)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{quizId}/questions/{questionId}/right-answer")
+    public ResponseEntity<?> updateRightAnswer(
+            @PathVariable String quizId,
+            @PathVariable String questionId,
+            @RequestBody Map<String, Object> body) {
+        Object rawAnswers = body.get("correctAnswers");
+        List<Integer> correctAnswers = new java.util.ArrayList<>();
+        if (rawAnswers instanceof List) {
+            for (Object item : (List<?>) rawAnswers) {
+                if (item instanceof Number) {
+                    correctAnswers.add(((Number) item).intValue());
+                } else if (item != null) {
+                    try {
+                        correctAnswers.add(Integer.parseInt(item.toString()));
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+        } else if (body.containsKey("correctAnswer")) {
+            Object single = body.get("correctAnswer");
+            if (single instanceof Number) {
+                correctAnswers.add(((Number) single).intValue());
+            } else if (single != null) {
+                try {
+                    correctAnswers.add(Integer.parseInt(single.toString()));
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+
+        return quizService.updateRightAnswer(quizId, questionId, correctAnswers)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{quizId}/questions/{questionId}")
+    public ResponseEntity<?> deleteQuestion(@PathVariable String quizId, @PathVariable String questionId) {
+        boolean deleted = quizService.deleteQuestion(quizId, questionId);
+        if (deleted) {
+            return ResponseEntity.ok(Map.of("message", "Question deleted successfully", "id", questionId));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PostMapping("/admin/reset")
     public ResponseEntity<?> resetSeedData() {
         quizService.resetSeedData();

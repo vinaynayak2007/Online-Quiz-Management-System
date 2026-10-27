@@ -74,4 +74,10 @@ Thumbs.db
 # System & Cache Directories
 .m2/
 .npm/
+.cache/
+.config/
+.local/
+node_modules/
+package.json
+package-lock.json
 .sudo_as_admin_successful

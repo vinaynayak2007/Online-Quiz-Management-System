@@ -11,11 +11,11 @@
   "tags" : [ "Java", "OOP", "JVM", "Streams" ],
   "questions" : [ {
     "id" : "q-j1",
-    "text" : "Which of the following is true regarding Java virtual threads introduced in Java 21 (Project Loom)?",
+    "text" : "Which of the following is true regarding Java virtual threads introduced in Project Loom?",
     "type" : "SINGLE_CHOICE",
     "options" : [ "They map 1:1 directly to operating system kernel threads", "They are lightweight threads managed by the JVM that drastically reduce memory overhead for concurrent tasks", "They replace the need for garbage collection in Java", "They can only run on single-core CPU architectures" ],
     "correctAnswers" : [ 1 ],
-    "explanation" : "Virtual threads are lightweight threads managed by the Java Virtual Machine rather than the underlying OS, allowing applications to handle millions of concurrent connections with minimal memory and context switching overhead.",
+    "explanation" : "Virtual threads are managed by the JVM rather than OS kernel threads.",
     "points" : 2
   }, {
     "id" : "q-j2",

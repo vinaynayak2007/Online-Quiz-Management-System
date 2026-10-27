@@ -93,6 +93,109 @@ public class QuizService {
         return firebaseService.deleteQuiz(id);
     }
 
+    // --- QUESTION LEVEL ADMIN OPERATIONS ---
+
+    public List<Question> getQuestionsForAdmin(String quizId) {
+        return firebaseService.getQuizById(quizId)
+                .map(Quiz::getQuestions)
+                .orElse(Collections.emptyList());
+    }
+
+    public Optional<Question> getQuestion(String quizId, String questionId) {
+        return firebaseService.getQuizById(quizId).flatMap(quiz -> {
+            if (quiz.getQuestions() == null) return Optional.empty();
+            return quiz.getQuestions().stream()
+                    .filter(q -> questionId.equals(q.getId()))
+                    .findFirst();
+        });
+    }
+
+    public Optional<Question> addQuestion(String quizId, Question question) {
+        Optional<Quiz> quizOpt = firebaseService.getQuizById(quizId);
+        if (quizOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        Quiz quiz = quizOpt.get();
+        if (quiz.getQuestions() == null) {
+            quiz.setQuestions(new ArrayList<>());
+        }
+        if (question.getId() == null || question.getId().trim().isEmpty()) {
+            question.setId("q-" + UUID.randomUUID().toString().substring(0, 8));
+        }
+        if (question.getCorrectAnswers() == null) {
+            question.setCorrectAnswers(new ArrayList<>());
+        }
+        if (question.getOptions() == null) {
+            question.setOptions(new ArrayList<>());
+        }
+        quiz.getQuestions().add(question);
+        firebaseService.saveQuiz(quiz);
+        return Optional.of(question);
+    }
+
+    public Optional<Question> updateQuestion(String quizId, String questionId, Question updated) {
+        Optional<Quiz> quizOpt = firebaseService.getQuizById(quizId);
+        if (quizOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        Quiz quiz = quizOpt.get();
+        if (quiz.getQuestions() == null) {
+            return Optional.empty();
+        }
+
+        for (int i = 0; i < quiz.getQuestions().size(); i++) {
+            Question q = quiz.getQuestions().get(i);
+            if (questionId.equals(q.getId())) {
+                if (updated.getText() != null) q.setText(updated.getText());
+                if (updated.getType() != null) q.setType(updated.getType());
+                if (updated.getOptions() != null) q.setOptions(updated.getOptions());
+                if (updated.getCorrectAnswers() != null) q.setCorrectAnswers(updated.getCorrectAnswers());
+                if (updated.getExplanation() != null) q.setExplanation(updated.getExplanation());
+                if (updated.getPoints() > 0) q.setPoints(updated.getPoints());
+
+                firebaseService.saveQuiz(quiz);
+                return Optional.of(q);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Question> updateRightAnswer(String quizId, String questionId, List<Integer> correctAnswers) {
+        Optional<Quiz> quizOpt = firebaseService.getQuizById(quizId);
+        if (quizOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        Quiz quiz = quizOpt.get();
+        if (quiz.getQuestions() == null) {
+            return Optional.empty();
+        }
+
+        for (Question q : quiz.getQuestions()) {
+            if (questionId.equals(q.getId())) {
+                q.setCorrectAnswers(correctAnswers != null ? correctAnswers : new ArrayList<>());
+                firebaseService.saveQuiz(quiz);
+                return Optional.of(q);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public boolean deleteQuestion(String quizId, String questionId) {
+        Optional<Quiz> quizOpt = firebaseService.getQuizById(quizId);
+        if (quizOpt.isEmpty()) {
+            return false;
+        }
+        Quiz quiz = quizOpt.get();
+        if (quiz.getQuestions() == null) {
+            return false;
+        }
+        boolean removed = quiz.getQuestions().removeIf(q -> questionId.equals(q.getId()));
+        if (removed) {
+            firebaseService.saveQuiz(quiz);
+        }
+        return removed;
+    }
+
     public Set<String> getAllCategories() {
         return firebaseService.getAllQuizzes().stream()
                 .map(Quiz::getCategory)

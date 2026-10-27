@@ -9,15 +9,37 @@ An enterprise-grade, full-stack **Online Quiz Management System** built with **J
 
 ---
 
-## 📸 Application Screenshot Preview
+## 📸 Application Screenshot Previews
 
+### 1. Student Quiz Runner & Dashboard (`index.html`)
 ![Online Quiz Management System Dashboard](quiz_dashboard_preview.png)
+
+### 2. Dedicated Single-Page Question & Right Answer Studio (`admin.html`)
+![Admin Panel Question & Right Answer Management](admin_panel_preview.png)
+
+### 3. Interactive Question Editor & Real-Time Options Builder Modal
+![Question & Right Answer Editor Modal](admin_edit_modal_preview.png)
+
+### 4. Instant 1-Click Right Answer Toggle with Live Feedback
+![Instant Right Answer Toggle](admin_updated_answer_preview.png)
 
 ---
 
 ## 🌟 Highlights & Key Features
 
-### 🎓 Student Quiz Portal
+### 🛠️ Dedicated Question & Right Answer Studio (`admin.html`)
+- **Single-Page Administrative Suite**: Fully responsive control center accessible at `http://localhost:8080/admin.html` or `/admin`.
+- **Live Visual Right Answer Highlighting**: Clear emerald green borders, radiant badges, and indicator pills distinguishing the designated correct answer from distractors.
+- **Instant 1-Click Right Answer Switcher**: Admin can change the designated right answer directly on any question card with a single click, instantly syncing via `PATCH /api/quizzes/{quizId}/questions/{questionId}/right-answer`.
+- **Comprehensive Question Modal**: Full-featured creator/editor supporting:
+  - Dynamic option builders (add/remove options, rename choices).
+  - Radio buttons for single-choice and checkboxes for multiple-choice questions.
+  - Question statement, points weight, and teacher explanations.
+  - Live side-by-side student preview box before committing changes.
+- **Quiz Hierarchy Selector**: Interactive sidebar to toggle between different assessment tracks (Java, Algorithms, Firebase Cloud, Web Dev) or generate new quizzes.
+- **Search & Filter Engine**: Instant search across question prompts, option strings, and explanations, plus filtering by single choice, multiple choice, and true/false.
+
+### 🎓 Student Quiz Portal (`index.html`)
 - **Interactive Quiz Player**: Clean, distraction-free interface with custom options selectors and question navigation.
 - **Real-Time Countdown Timer**: Live ticking timer with visual and auditory warnings when under 60 seconds.
 - **Question Navigator & Flagging**: Jump between questions, mark questions for review, and track answered vs unanswered status.
@@ -27,15 +49,10 @@ An enterprise-grade, full-stack **Online Quiz Management System** built with **J
 - **Hall of Fame & Leaderboard**: Real-time ranking with gold, silver, and bronze badges based on score and completion time.
 - **Sound Effects**: Native Web Audio API sound feedback for clicks, timer alerts, and passing/failing chimes.
 
-### 🛠️ Admin Management Portal
-- **Quiz Creator & Editor**: Full CRUD interface for quizzes with customizable passing thresholds, duration, and categories.
-- **Dynamic Question Bank Builder**: Add single-choice, multiple-choice, or true/false questions, assign point weightings, and provide explanations.
-- **Live System Analytics**: Monitor total quizzes, question count, student submissions, and global pass rates.
-- **Data Seed Reset**: One-click restore for pre-configured sample quizzes (Java, Firebase, Data Structures, Web Architecture).
-
 ### 🔥 Google Firebase Integration
-- **Cloud Firestore Storage**: Connects directly to Google Cloud Firestore via the official Firebase Admin SDK (`com.google.firebase:firebase-admin`).
-- **Hybrid Auto-Fallback Emulator**: If no Firebase credentials are provided initially, the system runs seamlessly in local emulated mode (file-backed JSON in `data/`), ensuring zero-friction setup.
+- **Project Configuration**: Integrated with Google Firebase project `micro-project-96796` (`firebase-adminsdk-fbsvc@micro-project-96796.iam.gserviceaccount.com`).
+- **Cloud Firestore Storage**: Connects directly to Google Cloud Firestore via the official Firebase Admin SDK (`com.google.firebase:firebase-admin:9.2.0`).
+- **Hybrid Auto-Fallback Emulator**: If Firestore API is pending activation on GCP, the system runs seamlessly in local emulated mode (file-backed JSON in `data/`), ensuring zero-friction setup and zero data loss.
 - **Runtime Firebase Configuration**: Switch to live Firebase at any time through the UI by pasting your service account private key JSON.
 - **Android Client Module**: Includes a native Android Java client architecture in `android-client/` with Firestore integration helpers.
 
@@ -137,8 +154,14 @@ By default, the application runs in **Local Emulated Mode** with preloaded sampl
 | `POST` | `/api/quizzes/{id}/submit` | Submit answers, calculate score, and return detailed scorecard |
 | `GET` | `/api/quizzes/{id}/admin` | Get complete quiz including correct answers and explanations |
 | `POST` | `/api/quizzes` | Create a new quiz and questions bank (Admin) |
-| `PUT` | `/api/quizzes/{id}` | Update existing quiz (Admin) |
+| `PUT` | `/api/quizzes/{id}` | Update existing quiz metadata (Admin) |
 | `DELETE` | `/api/quizzes/{id}` | Delete quiz (Admin) |
+| `GET` | `/api/quizzes/{id}/questions` | Get all questions with answers for a quiz (Admin Studio) |
+| `GET` | `/api/quizzes/{id}/questions/{qId}` | Get single question details with options and answers |
+| `POST` | `/api/quizzes/{id}/questions` | Add a new question to a quiz |
+| `PUT` | `/api/quizzes/{id}/questions/{qId}` | Update question text, options, right answers, points, and explanation |
+| `PATCH` | `/api/quizzes/{id}/questions/{qId}/right-answer` | Instant 1-click update of designated correct answer index |
+| `DELETE` | `/api/quizzes/{id}/questions/{qId}` | Delete question from quiz |
 | `GET` | `/api/leaderboard` | Get ranked leaderboard entries |
 | `GET` | `/api/analytics` | Get aggregate system statistics |
 | `GET` | `/api/firebase/status` | Check live Firebase Firestore connection status |

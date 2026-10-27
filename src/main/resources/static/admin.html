@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Online Quiz Management System</title>
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: #131b2e;
+      --bg-card-hover: #18223a;
+      --bg-input: #1a233a;
+      --border: #233050;
+      --border-focus: #3b82f6;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: rgba(99, 102, 241, 0.15);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.15);
+      --success-border: #059669;
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.15);
+      --warning: #f59e0b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(180deg, #162038 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-text h1 {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      background: #8b5cf6;
+      color: white;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .firebase-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      color: #34d399;
+      font-weight: 500;
+    }
+
+    .firebase-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: #6366f1;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #4f46e5;
+      transform: translateY(-1px);
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .btn-danger:hover {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+    .btn-outline:hover {
+      color: var(--text);
+      border-color: var(--border-focus);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 28px;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* Project Banner */
+    .project-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .project-info {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .project-meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-meta-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+      font-weight: 600;
+    }
+
+    .project-meta-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-accent {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    /* Stats bar */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .stat-icon.indigo { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+    .stat-icon.emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .stat-icon.amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .stat-icon.purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+    .stat-data {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-num {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Main Grid */
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 992px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Sidebar / Quiz Selector */
+    .sidebar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 86px;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quiz-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .quiz-item {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .quiz-item:hover {
+      background: var(--bg-card-hover);
+      border-color: #3b82f6;
+      transform: translateX(2px);
+    }
+
+    .quiz-item.active {
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(124, 58, 237, 0.15) 100%);
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px #6366f1;
+    }
+
+    .quiz-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .quiz-item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .quiz-item-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-easy { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-medium { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .badge-hard { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .badge-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+    /* Content Area */
+    .content-area {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .active-quiz-info h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .active-quiz-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin-bottom: 8px;
+    }
+
+    .active-quiz-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Filters and Search */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px 9px 36px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      pointer-events: none;
+    }
+
+    .filter-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 14px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Question Cards */
+    .questions-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .question-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .question-card:hover {
+      border-color: #334155;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .question-number-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .q-num {
+      background: #1e293b;
+      color: #94a3b8;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+    }
+
+    .question-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .question-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Option Items & Right Answer Showcase */
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: #162038;
+      border: 1px solid #233050;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .option-item:hover {
+      background: #1a2745;
+      border-color: #3b82f6;
+    }
+
+    /* RIGHT ANSWER HIGHLIGHTED STATE */
+    .option-item.is-right-answer {
+      background: rgba(16, 185, 129, 0.12);
+      border: 2px solid #10b981;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .option-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .option-indicator {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .option-item.is-right-answer .option-indicator {
+      background: #10b981;
+      border-color: #059669;
+      color: white;
+    }
+
+    .option-text {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .option-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .right-answer-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #10b981;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 9999px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+    }
+
+    .set-answer-btn {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .set-answer-btn:hover {
+      background: #6366f1;
+      color: white;
+      border-color: #6366f1;
+    }
+
+    .option-item.is-right-answer .set-answer-btn {
+      display: none;
+    }
+
+    /* Explanation */
+    .explanation-box {
+      background: rgba(30, 41, 59, 0.5);
+      border-left: 3px solid #6366f1;
+      padding: 10px 14px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .explanation-box strong {
+      color: #a5b4fc;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      transform: translateY(20px);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--bg-card);
+      z-index: 10;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Modal Options Builder */
+    .options-builder {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .builder-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+
+    .builder-item.is-correct {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .builder-radio {
+      accent-color: #10b981;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .builder-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      padding: 4px;
+    }
+
+    .builder-delete {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      opacity: 0.7;
+    }
+
+    .builder-delete:hover {
+      opacity: 1;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--bg-card);
+      position: sticky;
+      bottom: 0;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .toast {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-size: 13px;
+      animation: slideIn 0.3s ease;
+      min-width: 280px;
+    }
+
+    .toast.success {
+      border-left: 4px solid #10b981;
+    }
+
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Live Preview box */
+    .preview-box {
+      background: #0f172a;
+      border: 1px dashed #334155;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-top: 6px;
+    }
+
+    .preview-label {
+      font-size: 11px;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <a href="admin.html" class="brand">
+        <div class="brand-icon">Q</div>
+        <div class="brand-text">
+          <h1>QuizMaster Admin <span class="brand-badge">Studio</span></h1>
+          <p>Online Quiz & Question Management System</p>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <!-- Firebase Status Pill -->
+        <div id="firebase-pill" class="firebase-pill" title="Google Firebase Connection Status">
+          <div class="firebase-indicator"></div>
+          <span id="firebase-status-text">Firebase: micro-project-96796</span>
+        </div>
+
+        <button onclick="adminApp.openFirebaseModal()" class="btn btn-outline btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Firebase Key Info
+        </button>
+
+        <a href="index.html" class="btn btn-secondary btn-sm" title="Open Student Quiz Runner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Student Portal
+        </a>
+
+        <button onclick="adminApp.resetSeedData()" class="btn btn-outline btn-sm" title="Reset sample quizzes">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          Reset Samples
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container -->
+  <main class="container">
+
+    <!-- Project & Firebase Banner -->
+    <div class="project-card">
+      <div class="project-info">
+        <div class="project-meta-item">
+          <span class="project-meta-label">Active Firebase Project</span>
+          <span class="project-meta-value">
+            <span class="tag-accent" id="banner-project-id">micro-project-96796</span>
+          </span>
+        </div>
+        <div class="project-meta-item">
+          <span class="project-meta-label">Service Account Email</span>
+          <span class="project-meta-value" style="font-size: 12px; color: #94a3b8;" id="banner-client-email">
+            firebase-adminsdk-fbsvc@micro-project-96796.iam.gserviceaccount.com
+          </span>
+        </div>
+        <div class="project-meta-item">
+          <span class="project-meta-label">Backend Persistence</span>
+          <span class="project-meta-value" style="color: #34d399;" id="banner-mode">
+            Live Google Firebase / Firestore Ready
+          </span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="adminApp.openNewQuestionModal()" class="btn btn-success">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          + Add Question
+        </button>
+        <button onclick="adminApp.openNewQuizModal()" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          + New Quiz
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon indigo">📚</div>
+        <div class="stat-data">
+          <span class="stat-num" id="stat-quizzes-count">0</span>
+          <span class="stat-label">Total Quizzes</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon emerald">❓</div>
+        <div class="stat-data">
+          <span class="stat-num" id="stat-questions-count">0</span>
+          <span class="stat-label">Total Questions</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">🎯</div>
+        <div class="stat-data">
+          <span class="stat-num" id="stat-current-q-count">0</span>
+          <span class="stat-label">Questions in Active Quiz</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🏆</div>
+        <div class="stat-data">
+          <span class="stat-num" id="stat-attempts-count">0</span>
+          <span class="stat-label">Student Submissions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="admin-layout">
+
+      <!-- Sidebar: Quiz Selector -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Select Quiz
+          </span>
+          <button onclick="adminApp.loadQuizzes()" class="btn btn-outline btn-sm" title="Refresh">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+        </div>
+
+        <div id="quiz-list" class="quiz-list">
+          <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">Loading quizzes...</div>
+        </div>
+      </aside>
+
+      <!-- Main Content: Questions and Right Answers -->
+      <section class="content-area">
+
+        <!-- Selected Quiz Header -->
+        <div class="content-header">
+          <div class="active-quiz-info">
+            <h2 id="active-quiz-title">Loading Quiz...</h2>
+            <p id="active-quiz-desc" class="active-quiz-desc"></p>
+            <div class="active-quiz-badges" id="active-quiz-meta"></div>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button onclick="adminApp.openNewQuestionModal()" class="btn btn-success btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Question
+            </button>
+            <button onclick="adminApp.openEditQuizModal()" class="btn btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit Quiz Info
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="toolbar">
+          <div class="search-box">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="question-search-input" class="search-input" placeholder="Search questions, options, or explanations..." oninput="adminApp.filterQuestions()">
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="question-type-filter" class="filter-select" onchange="adminApp.filterQuestions()">
+              <option value="ALL">All Question Types</option>
+              <option value="SINGLE_CHOICE">Single Choice</option>
+              <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+              <option value="TRUE_FALSE">True / False</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Question Cards List -->
+        <div id="questions-list" class="questions-container">
+          <!-- Dynamically injected questions -->
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Question Edit / Create Modal -->
+  <div id="question-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="question-modal-title">Edit Question & Right Answer</h3>
+        <button class="modal-close" onclick="adminApp.closeModal('question-modal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="form-question-id">
+
+        <div class="form-group">
+          <label class="form-label">Question Text</label>
+          <textarea id="form-question-text" class="form-textarea" placeholder="Enter question statement here..." rows="3"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Question Type</label>
+            <select id="form-question-type" class="form-select" onchange="adminApp.onQuestionTypeChange()">
+              <option value="SINGLE_CHOICE">Single Choice (1 Correct Answer)</option>
+              <option value="MULTIPLE_CHOICE">Multiple Choice (Multiple Correct Answers)</option>
+              <option value="TRUE_FALSE">True / False</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Points</label>
+            <input type="number" id="form-question-points" class="form-input" min="1" max="100" value="1">
+          </div>
+        </div>
+
+        <!-- Options Builder Section -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom: 0;">Options & Designated Right Answer</label>
+            <span style="font-size: 11px; color: #10b981; font-weight: 600;">Check circle to designate as Right Answer</span>
+          </div>
+
+          <div id="builder-options-container" class="options-builder">
+            <!-- Dynamically generated builder items -->
+          </div>
+
+          <button type="button" onclick="adminApp.addOptionToBuilder()" class="btn btn-outline btn-sm" style="margin-top: 8px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + Add Another Option
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Explanation / Correct Answer Note (Shown to student on review)</label>
+          <textarea id="form-question-explanation" class="form-textarea" placeholder="Explain why this answer is correct..." rows="2"></textarea>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="preview-box">
+          <div class="preview-label">Live Preview (Student View)</div>
+          <div id="modal-preview-text" style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text);">Question text preview...</div>
+          <div id="modal-preview-options" style="display: flex; flex-direction: column; gap: 6px;"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="adminApp.closeModal('question-modal')">Cancel</button>
+        <button type="button" class="btn btn-success" onclick="adminApp.saveQuestionForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Question & Right Answer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New / Edit Quiz Modal -->
+  <div id="quiz-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="quiz-modal-title">Quiz Details</h3>
+        <button class="modal-close" onclick="adminApp.closeModal('quiz-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="form-quiz-id">
+        <div class="form-group">
+          <label class="form-label">Quiz Title</label>
+          <input type="text" id="form-quiz-title" class="form-input" placeholder="e.g. Advanced Java & Spring Boot">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="form-quiz-desc" class="form-textarea" placeholder="Brief quiz overview..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <input type="text" id="form-quiz-category" class="form-input" placeholder="e.g. Java, Cloud, Frontend">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Difficulty</label>
+            <select id="form-quiz-difficulty" class="form-select">
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Duration (Minutes)</label>
+            <input type="number" id="form-quiz-duration" class="form-input" value="15" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Passing Score (%)</label>
+            <input type="number" id="form-quiz-passing" class="form-input" value="70" min="10" max="100">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="adminApp.closeModal('quiz-modal')">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="adminApp.saveQuizForm()">Save Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Details Modal -->
+  <div id="firebase-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Firebase Credentials & Project Details</h3>
+        <button class="modal-close" onclick="adminApp.closeModal('firebase-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: #0f172a; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div class="project-meta-item">
+            <span class="project-meta-label">Google Cloud Project ID</span>
+            <span class="project-meta-value" style="color: #60a5fa;" id="fb-modal-project">micro-project-96796</span>
+          </div>
+          <div class="project-meta-item">
+            <span class="project-meta-label">Service Account Client Email</span>
+            <span class="project-meta-value" style="font-size: 13px; color: #e2e8f0;" id="fb-modal-client">firebase-adminsdk-fbsvc@micro-project-96796.iam.gserviceaccount.com</span>
+          </div>
+          <div class="project-meta-item">
+            <span class="project-meta-label">Key File</span>
+            <span class="project-meta-value">serviceAccountKey.json (Loaded)</span>
+          </div>
+          <div class="project-meta-item">
+            <span class="project-meta-label">Status & API Notice</span>
+            <span class="project-meta-value" style="color: #34d399;" id="fb-modal-message">Connected</span>
+          </div>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted);">
+          Note: If Cloud Firestore API is not yet activated on Google Cloud Console for <strong>micro-project-96796</strong>, quiz data safely persists in the local persistent JSON file (<code>data/quizzes.json</code>) and syncs directly to Firestore once activated at <a href="https://console.developers.google.com/apis/api/firestore.googleapis.com/overview?project=micro-project-96796" target="_blank" style="color: #38bdf8;">Google Cloud Console</a>.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="adminApp.closeModal('firebase-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script>
+    class AdminApp {
+      constructor() {
+        this.quizzes = [];
+        this.activeQuizId = null;
+        this.activeQuiz = null;
+        this.allQuestions = [];
+        this.optionLetterMap = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        this.builderOptions = [];
+      }
+
+      async init() {
+        await this.loadFirebaseStatus();
+        await this.loadQuizzes();
+      }
+
+      async loadFirebaseStatus() {
+        try {
+          const res = await fetch('/api/firebase/status');
+          if (res.ok) {
+            const data = await res.json();
+            const projectId = data.projectId || 'micro-project-96796';
+            const clientEmail = data.clientEmail || 'firebase-adminsdk-fbsvc@micro-project-96796.iam.gserviceaccount.com';
+            
+            document.getElementById('firebase-status-text').textContent = `Firebase: ${projectId}`;
+            document.getElementById('banner-project-id').textContent = projectId;
+            document.getElementById('banner-client-email').textContent = clientEmail;
+            document.getElementById('fb-modal-project').textContent = projectId;
+            document.getElementById('fb-modal-client').textContent = clientEmail;
+            document.getElementById('fb-modal-message').textContent = data.message || 'Connected to Firebase Admin SDK';
+
+            document.getElementById('stat-quizzes-count').textContent = data.totalQuizzes || 0;
+            document.getElementById('stat-questions-count').textContent = data.totalQuestions || 0;
+            document.getElementById('stat-attempts-count').textContent = data.totalAttempts || 0;
+          }
+        } catch (e) {
+          console.warn('Firebase status fetch failed:', e);
+        }
+      }
+
+      async loadQuizzes() {
+        try {
+          const res = await fetch('/api/quizzes/admin/all');
+          if (!res.ok) throw new Error('Failed to load quizzes');
+          this.quizzes = await res.json();
+          this.renderQuizList();
+
+          let totalQ = 0;
+          this.quizzes.forEach(q => totalQ += (q.questions ? q.questions.length : 0));
+          document.getElementById('stat-quizzes-count').textContent = this.quizzes.length;
+          document.getElementById('stat-questions-count').textContent = totalQ;
+
+          if (this.quizzes.length > 0) {
+            if (!this.activeQuizId || !this.quizzes.find(q => q.id === this.activeQuizId)) {
+              this.selectQuiz(this.quizzes[0].id);
+            } else {
+              this.selectQuiz(this.activeQuizId);
+            }
+          } else {
+            this.renderEmptyQuizState();
+          }
+        } catch (e) {
+          this.showToast('Failed to load quizzes: ' + e.message, 'error');
+        }
+      }
+
+      renderQuizList() {
+        const listEl = document.getElementById('quiz-list');
+        listEl.innerHTML = '';
+
+        if (!this.quizzes || this.quizzes.length === 0) {
+          listEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">No quizzes found. Click "+ New Quiz" above.</div>';
+          return;
+        }
+
+        this.quizzes.forEach(q => {
+          const count = q.questions ? q.questions.length : 0;
+          const isActive = q.id === this.activeQuizId;
+          const div = document.createElement('div');
+          div.className = `quiz-item ${isActive ? 'active' : ''}`;
+          div.onclick = () => this.selectQuiz(q.id);
+
+          div.innerHTML = `
+            <div class="quiz-item-header">
+              <span class="quiz-item-title">${this.escapeHtml(q.title)}</span>
+              <span class="badge badge-${(q.difficulty || 'medium').toLowerCase()}">${q.difficulty || 'Medium'}</span>
+            </div>
+            <div class="quiz-item-meta">
+              <span>${count} question${count === 1 ? '' : 's'}</span>
+              <span>${q.category || 'General'}</span>
+            </div>
+          `;
+          listEl.appendChild(div);
+        });
+      }
+
+      selectQuiz(quizId) {
+        this.activeQuizId = quizId;
+        this.activeQuiz = this.quizzes.find(q => q.id === quizId);
+        this.renderQuizList();
+
+        if (!this.activeQuiz) return;
+
+        // Render Active Quiz Header
+        document.getElementById('active-quiz-title').textContent = this.activeQuiz.title;
+        document.getElementById('active-quiz-desc').textContent = this.activeQuiz.description || 'No description provided.';
+        
+        const questionsCount = this.activeQuiz.questions ? this.activeQuiz.questions.length : 0;
+        document.getElementById('stat-current-q-count').textContent = questionsCount;
+
+        const metaEl = document.getElementById('active-quiz-meta');
+        metaEl.innerHTML = `
+          <span class="badge badge-purple">${this.escapeHtml(this.activeQuiz.category || 'General')}</span>
+          <span class="badge badge-${(this.activeQuiz.difficulty || 'medium').toLowerCase()}">${this.activeQuiz.difficulty || 'Medium'}</span>
+          <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">⏱ ${this.activeQuiz.durationMinutes || 15} Mins</span>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">Passing: ${this.activeQuiz.passingScorePercent || 70}%</span>
+          <span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1;">ID: ${this.activeQuiz.id}</span>
+        `;
+
+        this.allQuestions = this.activeQuiz.questions || [];
+        this.filterQuestions();
+      }
+
+      filterQuestions() {
+        const search = (document.getElementById('question-search-input').value || '').toLowerCase().trim();
+        const typeFilter = document.getElementById('question-type-filter').value;
+
+        let filtered = this.allQuestions;
+
+        if (typeFilter !== 'ALL') {
+          filtered = filtered.filter(q => (q.type || 'SINGLE_CHOICE') === typeFilter);
+        }
+
+        if (search) {
+          filtered = filtered.filter(q => {
+            const matchText = (q.text || '').toLowerCase().includes(search);
+            const matchExp = (q.explanation || '').toLowerCase().includes(search);
+            const matchOpt = (q.options || []).some(opt => opt.toLowerCase().includes(search));
+            return matchText || matchExp || matchOpt;
+          });
+        }
+
+        this.renderQuestions(filtered);
+      }
+
+      renderQuestions(questions) {
+        const container = document.getElementById('questions-list');
+        container.innerHTML = '';
+
+        if (!questions || questions.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; color: var(--text-subtle);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <h3>No questions found</h3>
+              <p style="font-size: 13px; margin-top: 4px;">Click "+ Add Question" above to add a question to this quiz.</p>
+            </div>
+          `;
+          return;
+        }
+
+        questions.forEach((q, index) => {
+          const card = document.createElement('div');
+          card.className = 'question-card';
+          card.id = `q-card-${q.id}`;
+
+          const isMulti = q.type === 'MULTIPLE_CHOICE';
+          const correctAnswers = q.correctAnswers || [];
+
+          // Options markup
+          let optionsHtml = '';
+          (q.options || []).forEach((opt, optIdx) => {
+            const isRight = correctAnswers.includes(optIdx);
+            const letter = this.optionLetterMap[optIdx] || (optIdx + 1);
+
+            optionsHtml += `
+              <div class="option-item ${isRight ? 'is-right-answer' : ''}" id="opt-item-${q.id}-${optIdx}">
+                <div class="option-left">
+                  <div class="option-indicator">${letter}</div>
+                  <span class="option-text">${this.escapeHtml(opt)}</span>
+                </div>
+                <div class="option-right">
+                  ${isRight ? `
+                    <span class="right-answer-tag">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      RIGHT ANSWER
+                    </span>
+                  ` : `
+                    <button class="set-answer-btn" onclick="adminApp.setRightAnswer('${q.id}', ${optIdx}, ${isMulti})" title="Click to designate this option as the right answer">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                      Set as Right Answer
+                    </button>
+                  `}
+                </div>
+              </div>
+            `;
+          });
+
+          card.innerHTML = `
+            <div class="question-header">
+              <div class="question-number-pill">
+                <span class="q-num">#${index + 1}</span>
+                <span class="badge badge-purple">${this.formatType(q.type)}</span>
+                <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd;">${q.points || 1} Pt${(q.points || 1) === 1 ? '' : 's'}</span>
+              </div>
+              <div class="question-actions">
+                <button onclick="adminApp.openEditQuestionModal('${q.id}')" class="btn btn-secondary btn-sm" title="Edit Question & Options">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Edit
+                </button>
+                <button onclick="adminApp.deleteQuestion('${q.id}')" class="btn btn-danger btn-sm" title="Delete Question">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="question-title">${this.escapeHtml(q.text || 'Untitled Question')}</div>
+
+            <div class="options-grid">
+              ${optionsHtml}
+            </div>
+
+            ${q.explanation ? `
+              <div class="explanation-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <div><strong>Explanation:</strong> ${this.escapeHtml(q.explanation)}</div>
+              </div>
+            ` : ''}
+          `;
+
+          container.appendChild(card);
+        });
+      }
+
+      formatType(type) {
+        if (type === 'MULTIPLE_CHOICE') return 'Multiple Choice';
+        if (type === 'TRUE_FALSE') return 'True / False';
+        return 'Single Choice';
+      }
+
+      /* -------------------------------------------------------------
+         RIGHT ANSWER DIRECT 1-CLICK TOGGLE & UPDATE
+      -------------------------------------------------------------- */
+      async setRightAnswer(questionId, newOptionIndex, isMulti) {
+        const question = this.allQuestions.find(q => q.id === questionId);
+        if (!question) return;
+
+        let newAnswers = [];
+        if (isMulti) {
+          const current = new Set(question.correctAnswers || []);
+          if (current.has(newOptionIndex)) {
+            current.delete(newOptionIndex);
+          } else {
+            current.add(newOptionIndex);
+          }
+          newAnswers = Array.from(current);
+        } else {
+          newAnswers = [newOptionIndex];
+        }
+
+        try {
+          const res = await fetch(`/api/quizzes/${this.activeQuizId}/questions/${questionId}/right-answer`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correctAnswers: newAnswers })
+          });
+
+          if (!res.ok) throw new Error('Failed to update right answer');
+          const updatedQ = await res.json();
+
+          // Update local memory
+          question.correctAnswers = updatedQ.correctAnswers;
+
+          // Re-render questions smoothly
+          this.filterQuestions();
+
+          const letter = this.optionLetterMap[newOptionIndex] || (newOptionIndex + 1);
+          this.showToast(`Right answer updated to Option ${letter}! Persisted to Firebase.`, 'success');
+        } catch (e) {
+          this.showToast('Error updating right answer: ' + e.message, 'error');
+        }
+      }
+
+      /* -------------------------------------------------------------
+         QUESTION MODAL BUILDER (EDIT & CREATE)
+      -------------------------------------------------------------- */
+      openNewQuestionModal() {
+        if (!this.activeQuizId) {
+          this.showToast('Please select or create a quiz first', 'error');
+          return;
+        }
+        document.getElementById('question-modal-title').textContent = 'Add New Question & Right Answer';
+        document.getElementById('form-question-id').value = '';
+        document.getElementById('form-question-text').value = '';
+        document.getElementById('form-question-type').value = 'SINGLE_CHOICE';
+        document.getElementById('form-question-points').value = '1';
+        document.getElementById('form-question-explanation').value = '';
+
+        // Default 4 blank options, option 0 as right answer
+        this.builderOptions = [
+          { text: 'First option', isCorrect: true },
+          { text: 'Second option', isCorrect: false },
+          { text: 'Third option', isCorrect: false },
+          { text: 'Fourth option', isCorrect: false }
+        ];
+
+        this.renderBuilderOptions();
+        this.openModal('question-modal');
+      }
+
+      openEditQuestionModal(questionId) {
+        const q = this.allQuestions.find(item => item.id === questionId);
+        if (!q) return;
+
+        document.getElementById('question-modal-title').textContent = 'Edit Question & Right Answer';
+        document.getElementById('form-question-id').value = q.id;
+        document.getElementById('form-question-text').value = q.text || '';
+        document.getElementById('form-question-type').value = q.type || 'SINGLE_CHOICE';
+        document.getElementById('form-question-points').value = q.points || 1;
+        document.getElementById('form-question-explanation').value = q.explanation || '';
+
+        const correct = q.correctAnswers || [];
+        this.builderOptions = (q.options || []).map((opt, idx) => ({
+          text: opt,
+          isCorrect: correct.includes(idx)
+        }));
+
+        if (this.builderOptions.length === 0) {
+          this.builderOptions = [
+            { text: 'Option A', isCorrect: true },
+            { text: 'Option B', isCorrect: false }
+          ];
+        }
+
+        this.renderBuilderOptions();
+        this.openModal('question-modal');
+      }
+
+      onQuestionTypeChange() {
+        const type = document.getElementById('form-question-type').value;
+        if (type === 'TRUE_FALSE') {
+          this.builderOptions = [
+            { text: 'True', isCorrect: true },
+            { text: 'False', isCorrect: false }
+          ];
+        } else if (type === 'SINGLE_CHOICE') {
+          // ensure at most 1 is correct
+          let foundOne = false;
+          this.builderOptions.forEach(opt => {
+            if (opt.isCorrect && !foundOne) {
+              foundOne = true;
+            } else {
+              opt.isCorrect = false;
+            }
+          });
+          if (!foundOne && this.builderOptions.length > 0) {
+            this.builderOptions[0].isCorrect = true;
+          }
+        }
+        this.renderBuilderOptions();
+      }
+
+      renderBuilderOptions() {
+        const container = document.getElementById('builder-options-container');
+        container.innerHTML = '';
+        const isMulti = document.getElementById('form-question-type').value === 'MULTIPLE_CHOICE';
+
+        this.builderOptions.forEach((opt, idx) => {
+          const letter = this.optionLetterMap[idx] || (idx + 1);
+          const item = document.createElement('div');
+          item.className = `builder-item ${opt.isCorrect ? 'is-correct' : ''}`;
+
+          item.innerHTML = `
+            <input type="${isMulti ? 'checkbox' : 'radio'}" name="builder-correct" class="builder-radio" ${opt.isCorrect ? 'checked' : ''} onchange="adminApp.setBuilderCorrect(${idx})" title="Mark as right answer">
+            <span style="font-weight: 700; color: #94a3b8; font-size: 13px; width: 20px;">${letter}</span>
+            <input type="text" class="builder-input" value="${this.escapeHtml(opt.text)}" placeholder="Option text..." oninput="adminApp.updateBuilderText(${idx}, this.value)">
+            ${opt.isCorrect ? `
+              <span style="color: #10b981; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                Right Answer
+              </span>
+            ` : ''}
+            <button type="button" class="builder-delete" onclick="adminApp.removeOptionFromBuilder(${idx})" title="Remove option">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          `;
+          container.appendChild(item);
+        });
+
+        this.updateLivePreview();
+      }
+
+      setBuilderCorrect(idx) {
+        const isMulti = document.getElementById('form-question-type').value === 'MULTIPLE_CHOICE';
+        if (isMulti) {
+          this.builderOptions[idx].isCorrect = !this.builderOptions[idx].isCorrect;
+        } else {
+          this.builderOptions.forEach((opt, i) => {
+            opt.isCorrect = (i === idx);
+          });
+        }
+        this.renderBuilderOptions();
+      }
+
+      updateBuilderText(idx, text) {
+        this.builderOptions[idx].text = text;
+        this.updateLivePreview();
+      }
+
+      addOptionToBuilder() {
+        this.builderOptions.push({
+          text: `Option ${this.optionLetterMap[this.builderOptions.length] || (this.builderOptions.length + 1)}`,
+          isCorrect: false
+        });
+        this.renderBuilderOptions();
+      }
+
+      removeOptionFromBuilder(idx) {
+        if (this.builderOptions.length <= 2) {
+          this.showToast('A question must have at least 2 options', 'error');
+          return;
+        }
+        this.builderOptions.splice(idx, 1);
+        // If no correct answer left, make the first one correct
+        if (!this.builderOptions.some(o => o.isCorrect)) {
+          this.builderOptions[0].isCorrect = true;
+        }
+        this.renderBuilderOptions();
+      }
+
+      updateLivePreview() {
+        const qText = document.getElementById('form-question-text').value || 'Question text...';
+        document.getElementById('modal-preview-text').textContent = qText;
+
+        const pContainer = document.getElementById('modal-preview-options');
+        pContainer.innerHTML = '';
+
+        this.builderOptions.forEach((opt, idx) => {
+          const letter = this.optionLetterMap[idx] || (idx + 1);
+          const div = document.createElement('div');
+          div.style.cssText = `
+            padding: 6px 10px;
+            background: ${opt.isCorrect ? 'rgba(16, 185, 129, 0.15)' : '#162038'};
+            border: 1px solid ${opt.isCorrect ? '#10b981' : '#233050'};
+            border-radius: 6px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          `;
+          div.innerHTML = `
+            <span><strong>${letter}.</strong> ${this.escapeHtml(opt.text || 'Option')}</span>
+            ${opt.isCorrect ? '<span style="color: #10b981; font-weight: 700; font-size: 11px;">✓ Designated Right Answer</span>' : ''}
+          `;
+          pContainer.appendChild(div);
+        });
+      }
+
+      async saveQuestionForm() {
+        const qId = document.getElementById('form-question-id').value;
+        const text = document.getElementById('form-question-text').value.trim();
+        const type = document.getElementById('form-question-type').value;
+        const points = parseInt(document.getElementById('form-question-points').value, 10) || 1;
+        const explanation = document.getElementById('form-question-explanation').value.trim();
+
+        if (!text) {
+          this.showToast('Please enter the question text', 'error');
+          return;
+        }
+
+        const options = this.builderOptions.map(o => o.text.trim());
+        if (options.some(o => !o)) {
+          this.showToast('All options must contain text', 'error');
+          return;
+        }
+
+        const correctAnswers = [];
+        this.builderOptions.forEach((o, i) => {
+          if (o.isCorrect) correctAnswers.push(i);
+        });
+
+        if (correctAnswers.length === 0) {
+          this.showToast('Please designate at least one option as the Right Answer', 'error');
+          return;
+        }
+
+        const payload = {
+          id: qId || undefined,
+          text,
+          type,
+          options,
+          correctAnswers,
+          explanation,
+          points
+        };
+
+        try {
+          let res;
+          if (qId) {
+            // Update existing question
+            res = await fetch(`/api/quizzes/${this.activeQuizId}/questions/${qId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+          } else {
+            // Add new question
+            res = await fetch(`/api/quizzes/${this.activeQuizId}/questions`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+          }
+
+          if (!res.ok) throw new Error('Server returned ' + res.status);
+          const savedQuestion = await res.json();
+
+          this.closeModal('question-modal');
+          this.showToast(qId ? 'Question & Right Answer updated successfully!' : 'New question added and synced to Firebase!', 'success');
+
+          // Refresh quiz details
+          await this.loadQuizzes();
+        } catch (e) {
+          this.showToast('Failed to save question: ' + e.message, 'error');
+        }
+      }
+
+      async deleteQuestion(questionId) {
+        if (!confirm('Are you sure you want to delete this question?')) return;
+
+        try {
+          const res = await fetch(`/api/quizzes/${this.activeQuizId}/questions/${questionId}`, {
+            method: 'DELETE'
+          });
+
+          if (!res.ok) throw new Error('Failed to delete question');
+          this.showToast('Question deleted successfully', 'success');
+          await this.loadQuizzes();
+        } catch (e) {
+          this.showToast('Error deleting question: ' + e.message, 'error');
+        }
+      }
+
+      /* -------------------------------------------------------------
+         QUIZ CREATE & EDIT
+      -------------------------------------------------------------- */
+      openNewQuizModal() {
+        document.getElementById('quiz-modal-title').textContent = 'Create New Quiz';
+        document.getElementById('form-quiz-id').value = '';
+        document.getElementById('form-quiz-title').value = '';
+        document.getElementById('form-quiz-desc').value = '';
+        document.getElementById('form-quiz-category').value = 'General';
+        document.getElementById('form-quiz-difficulty').value = 'Beginner';
+        document.getElementById('form-quiz-duration').value = '15';
+        document.getElementById('form-quiz-passing').value = '70';
+        this.openModal('quiz-modal');
+      }
+
+      openEditQuizModal() {
+        if (!this.activeQuiz) return;
+        document.getElementById('quiz-modal-title').textContent = 'Edit Quiz Info';
+        document.getElementById('form-quiz-id').value = this.activeQuiz.id;
+        document.getElementById('form-quiz-title').value = this.activeQuiz.title;
+        document.getElementById('form-quiz-desc').value = this.activeQuiz.description || '';
+        document.getElementById('form-quiz-category').value = this.activeQuiz.category || '';
+        document.getElementById('form-quiz-difficulty').value = this.activeQuiz.difficulty || 'Medium';
+        document.getElementById('form-quiz-duration').value = this.activeQuiz.durationMinutes || 15;
+        document.getElementById('form-quiz-passing').value = this.activeQuiz.passingScorePercent || 70;
+        this.openModal('quiz-modal');
+      }
+
+      async saveQuizForm() {
+        const id = document.getElementById('form-quiz-id').value;
+        const title = document.getElementById('form-quiz-title').value.trim();
+        const description = document.getElementById('form-quiz-desc').value.trim();
+        const category = document.getElementById('form-quiz-category').value.trim() || 'General';
+        const difficulty = document.getElementById('form-quiz-difficulty').value;
+        const durationMinutes = parseInt(document.getElementById('form-quiz-duration').value, 10) || 15;
+        const passingScorePercent = parseInt(document.getElementById('form-quiz-passing').value, 10) || 70;
+
+        if (!title) {
+          this.showToast('Quiz title is required', 'error');
+          return;
+        }
+
+        const payload = {
+          title,
+          description,
+          category,
+          difficulty,
+          durationMinutes,
+          passingScorePercent,
+          active: true,
+          questions: id ? (this.activeQuiz ? this.activeQuiz.questions : []) : []
+        };
+
+        try {
+          let res;
+          if (id) {
+            res = await fetch(`/api/quizzes/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+          } else {
+            res = await fetch('/api/quizzes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+          }
+
+          if (!res.ok) throw new Error('Failed to save quiz');
+          const saved = await res.json();
+          this.closeModal('quiz-modal');
+          this.showToast('Quiz saved successfully!', 'success');
+          await this.loadQuizzes();
+          this.selectQuiz(saved.id);
+        } catch (e) {
+          this.showToast('Failed to save quiz: ' + e.message, 'error');
+        }
+      }
+
+      async resetSeedData() {
+        if (!confirm('Reset all quizzes to the original sample questions? Any custom additions will be refreshed.')) return;
+        try {
+          const res = await fetch('/api/quizzes/admin/reset', { method: 'POST' });
+          if (res.ok) {
+            this.showToast('Sample quizzes successfully restored!', 'success');
+            await this.loadQuizzes();
+          }
+        } catch (e) {
+          this.showToast('Error resetting: ' + e.message, 'error');
+        }
+      }
+
+      /* -------------------------------------------------------------
+         UI UTILITIES
+      -------------------------------------------------------------- */
+      openFirebaseModal() {
+        this.openModal('firebase-modal');
+      }
+
+      openModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+      }
+
+      closeModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+      }
+
+      showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+          <span>${type === 'success' ? '✓' : '⚠'}</span>
+          <span>${this.escapeHtml(message)}</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(10px)';
+          toast.style.transition = 'all 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 3500);
+      }
+
+      escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+    }
+
+    const adminApp = new AdminApp();
+    window.addEventListener('DOMContentLoaded', () => adminApp.init());
+  </script>
+</body>
+</html>

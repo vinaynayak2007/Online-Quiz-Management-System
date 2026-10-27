@@ -282,12 +282,17 @@ public class FirebaseService {
         boolean connected = firebaseConfig.isInitialized();
         String mode = connected ? "FIREBASE_FIRESTORE" : "LOCAL_EMULATOR";
         String projectId = firebaseConfig.getProjectId();
+        String clientEmail = firebaseConfig.getClientEmail();
         String database = connected ? "Cloud Firestore (Google Cloud)" : "Local Firestore Emulated Storage (JSON file-backed)";
         String message = firebaseConfig.getStatusMessage();
         long quizzesCount = localQuizzes.size();
+        long questionsCount = localQuizzes.values().stream()
+                .filter(q -> q.getQuestions() != null)
+                .mapToLong(q -> q.getQuestions().size())
+                .sum();
         long attemptsCount = localAttempts.size();
 
-        return new FirebaseStatus(connected, mode, projectId, database, message, quizzesCount, attemptsCount);
+        return new FirebaseStatus(connected, mode, projectId, clientEmail, database, message, quizzesCount, questionsCount, attemptsCount);
     }
 
     public boolean configureFirebase(InputStream credentialsStream) {

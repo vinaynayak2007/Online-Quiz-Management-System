@@ -1,6 +1,9 @@
 package com.quizsystem.config;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -11,9 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import jakarta.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 public class FirebaseConfig {
@@ -26,9 +31,11 @@ public class FirebaseConfig {
     private String databaseUrl;
 
     private boolean initialized = false;
-    private String projectId = "quiz-system-demo";
+    private String projectId = "micro-project-96796";
+    private String clientEmail = "";
     private Firestore firestore = null;
     private String statusMessage = "Using Local Firebase Storage & Emulator";
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @PostConstruct
     public void init() {
@@ -43,32 +50,61 @@ public class FirebaseConfig {
                 }
             }
 
-            InputStream serviceAccount = customStream;
+            byte[] keyBytes = null;
 
-            if (serviceAccount == null) {
+            if (customStream != null) {
+                keyBytes = customStream.readAllBytes();
+            } else {
                 File file = new File(configPath);
                 if (file.exists() && file.isFile()) {
-                    serviceAccount = new FileInputStream(file);
-                    logger.info("Found Firebase service account at path: {}", file.getAbsolutePath());
+                    try (FileInputStream fis = new FileInputStream(file)) {
+                        keyBytes = fis.readAllBytes();
+                        logger.info("Found Firebase service account at path: {}", file.getAbsolutePath());
+                    }
                 } else {
                     String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
                     if (envPath != null && new File(envPath).exists()) {
-                        serviceAccount = new FileInputStream(envPath);
-                        logger.info("Found Firebase credentials from GOOGLE_APPLICATION_CREDENTIALS: {}", envPath);
+                        try (FileInputStream fis = new FileInputStream(envPath)) {
+                            keyBytes = fis.readAllBytes();
+                            logger.info("Found Firebase credentials from GOOGLE_APPLICATION_CREDENTIALS: {}", envPath);
+                        }
                     } else {
                         InputStream cpStream = getClass().getClassLoader().getResourceAsStream("serviceAccountKey.json");
                         if (cpStream != null) {
-                            serviceAccount = cpStream;
+                            keyBytes = cpStream.readAllBytes();
                             logger.info("Found Firebase credentials in classpath: serviceAccountKey.json");
                         }
                     }
                 }
             }
 
-            if (serviceAccount != null) {
-                GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
+            if (keyBytes != null && keyBytes.length > 0) {
+                try {
+                    JsonNode root = mapper.readTree(keyBytes);
+                    if (root.has("project_id")) {
+                        this.projectId = root.get("project_id").asText();
+                    }
+                    if (root.has("client_email")) {
+                        this.clientEmail = root.get("client_email").asText();
+                    }
+                } catch (Exception e) {
+                    logger.warn("Could not parse JSON fields from key: {}", e.getMessage());
+                }
+
+                GoogleCredentials credentials = GoogleCredentials.fromStream(new ByteArrayInputStream(keyBytes));
+                if (credentials instanceof ServiceAccountCredentials) {
+                    ServiceAccountCredentials sac = (ServiceAccountCredentials) credentials;
+                    if (sac.getProjectId() != null && !sac.getProjectId().isEmpty()) {
+                        this.projectId = sac.getProjectId();
+                    }
+                    if (sac.getClientEmail() != null && !sac.getClientEmail().isEmpty()) {
+                        this.clientEmail = sac.getClientEmail();
+                    }
+                }
+
                 FirebaseOptions.Builder builder = FirebaseOptions.builder()
-                        .setCredentials(credentials);
+                        .setCredentials(credentials)
+                        .setProjectId(this.projectId);
 
                 if (databaseUrl != null && !databaseUrl.trim().isEmpty()) {
                     builder.setDatabaseUrl(databaseUrl.trim());
@@ -77,10 +113,9 @@ public class FirebaseConfig {
                 FirebaseOptions options = builder.build();
                 FirebaseApp app = FirebaseApp.initializeApp(options);
                 this.firestore = FirestoreClient.getFirestore(app);
-                this.projectId = options.getProjectId() != null ? options.getProjectId() : "firebase-quiz-project";
                 this.initialized = true;
                 this.statusMessage = "Connected to Live Firebase Firestore (Project: " + this.projectId + ")";
-                logger.info(">>> Firebase Admin SDK successfully initialized! Project: {}", this.projectId);
+                logger.info(">>> Firebase Admin SDK successfully initialized! Project: {}, Client: {}", this.projectId, this.clientEmail);
                 return true;
             } else {
                 this.initialized = false;
@@ -107,6 +142,10 @@ public class FirebaseConfig {
 
     public String getProjectId() {
         return projectId;
+    }
+
+    public String getClientEmail() {
+        return clientEmail;
     }
 
     public String getStatusMessage() {
