@@ -1,11 +1,49 @@
-# 🚀 Online Quiz Management System (Java + Firebase)
+# 🚀 Online Quiz Management System (Java + Firebase + Android APK)
 
 [![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Android](https://img.shields.io/badge/Android-APK%20Available-3DDC84.svg?logo=android&logoColor=white)](OnlineQuizSystem.apk)
 [![Firebase](https://img.shields.io/badge/Firebase-Admin%20SDK-yellow.svg)](https://firebase.google.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An enterprise-grade, full-stack **Online Quiz Management System** built with **Java 21**, **Spring Boot 3**, and **Google Firebase Firestore**. Featuring real-time timed assessments, instant scoring and grade calculation, educational explanations, admin question bank management, leaderboards, printable certificates of achievement, and seamless cloud synchronization.
+An enterprise-grade, full-stack **Online Quiz & Exam Management System** built with **Java 21**, **Spring Boot 3**, **Google Firebase Firestore**, and a **Native Android Application (`.apk`)** for mobile exams. Featuring real-time timed assessments, instant scoring and grade calculation, educational explanations, admin question bank management, leaderboards, printable certificates of achievement, and offline mobile exam capability.
+
+---
+
+## 📱 Quick Links & Downloads
+
+| Resource | Link / Access | Description |
+| :--- | :--- | :--- |
+| **Android App (APK)** | [📥 **Download OnlineQuizSystem.apk**](OnlineQuizSystem.apk) | Ready-to-install Android package for student mobile exams |
+| **GitHub APK Direct Link** | [🔗 **Raw GitHub APK Download**](https://github.com/vinaynayak2007/Online-Quiz-Management-System/raw/main/OnlineQuizSystem.apk) | Direct APK download link from the GitHub repository |
+| **GitHub Repository** | [🌐 **vinaynayak2007/Online-Quiz-Management-System**](https://github.com/vinaynayak2007/Online-Quiz-Management-System) | Full source code, Android client, and backend |
+| **Web Student Portal** | [🖥️ `http://localhost:8080/`](http://localhost:8080/) | Interactive exam runner, countdown timers, scorecards |
+| **Question Studio (Admin)** | [⚙️ `http://localhost:8080/admin.html`](http://localhost:8080/admin.html) | Standalone visual question & right-answer control suite |
+
+---
+
+## 📲 Android Mobile Exam Application (`OnlineQuizSystem.apk`)
+
+The included Android application (`OnlineQuizSystem.apk`, signed and release-ready) allows students to take exams directly on their Android devices with 100% offline capability or online syncing.
+
+### 🌟 Android App Features
+- **Standalone Offline Exam Engine**: Pre-bundled with comprehensive question banks across Java 21, Data Structures & Algorithms, Google Firebase Cloud Architecture, and Modern Web Development.
+- **Real-Time Timed Exams**: Interactive ticking timer with automatic warning states and instant auto-submit on countdown expiry.
+- **Question Flagging & Navigator**: Jump effortlessly between questions and review marked items before final submission.
+- **Immediate Evaluation & Scorecard**: Instant grading with percentage, letter grade (A+, A, B, C, F), and question-by-question breakdown showing correct choices and detailed teacher explanations.
+- **Native Android Hardware Acceleration**: Smooth, high-performance animations, fluid touch scrolling, and zero lag on mobile screens.
+
+### 📥 How to Install the APK on Android
+1. **Download the APK**:
+   - Direct download via browser: [`OnlineQuizSystem.apk`](https://github.com/vinaynayak2007/Online-Quiz-Management-System/raw/main/OnlineQuizSystem.apk)
+   - Or when running the server locally: `http://localhost:8080/OnlineQuizSystem.apk`
+2. **Allow Installation from Unknown Sources**:
+   - On Android 8.0+: When prompted after downloading, tap **Settings** and toggle **"Allow from this source"**.
+   - On older Android versions: Go to **Settings > Security > Unknown Sources** and enable it.
+3. **Install & Launch**:
+   - Tap `OnlineQuizSystem.apk` in your phone's notification panel or Downloads folder.
+   - Tap **Install** and then **Open**.
+   - Start taking your quizzes immediately!
 
 ---
 
