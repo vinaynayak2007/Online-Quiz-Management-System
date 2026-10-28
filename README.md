@@ -10,6 +10,21 @@ An enterprise-grade, full-stack **Online Quiz & Exam Management System** built w
 
 ---
 
+## 🎓 Course Outcomes (CO) Addressed in this Micro-Project
+
+This project strictly adheres to academic syllabus objectives through dedicated Java implementations:
+
+| Course Outcome | Description | Technical Implementation |
+| :--- | :--- | :--- |
+| **CO-1** | **Classes, Objects & Inheritance** | • `User` base class (`com.quizsystem.model.User`).<br>• Inheritance demonstrated via `Candidate extends User` (with exam metrics, pass percentage, student ID) and `AdminUser extends User` (with super-admin credentials and permission controls).<br>• Object models for `Question`, `Quiz`, `StudentAnswer`, and `QuizResult`. |
+| **CO-2** | **Interfaces, Polymorphism & Package Organization** | • `QuizEvaluator` interface (`com.quizsystem.evaluator`) with runtime polymorphic strategies: `StandardQuizEvaluator` (standard grading) and `StrictPenaltyQuizEvaluator` (competitive penalty scoring).<br>• `ReportGenerator` interface (`com.quizsystem.report`) with polymorphic implementations: `PerformanceSummaryReportGenerator` (class statistics) and `CertificateReportGenerator` (accreditation rosters).<br>• Organized into specialized packages: `model`, `evaluator`, `report`, `exception`, `concurrency`, `service`, `controller`. |
+| **CO-3** | **Exception Handling, Timer Thread & Synchronization** | • Custom exception hierarchy (`com.quizsystem.exception`): `InvalidInputException`, `DatabaseException`, `QuizExpiredException`, and `DuplicateSubmissionException`, handled centrally via `@RestControllerAdvice` (`GlobalExceptionHandler`).<br>• **Separate Timer Thread**: `QuizTimerManager` (`com.quizsystem.concurrency`) runs a background daemon thread ticking active sessions to automatically enforce quiz expiry.<br>• **Synchronization**: `SubmissionSyncManager` uses `synchronized` blocks to atomically block duplicate or concurrent submissions. |
+| **CO-4** | **Collections (`ArrayList`) & Java Streams** | • `ArrayList<Question>`, `ArrayList<StudentAnswer>`, `ArrayList<Attempt>`, and `ArrayList<Candidate>` used throughout the business logic.<br>• Java Stream API operations (`.filter()`, `.mapToDouble()`, `.average()`, `.collect(groupingBy())`, `.collect(partitioningBy())`, `.sorted()`) compute class averages, top performers, and pass/fail summaries. |
+
+📄 *For full code listings and mapping, see [`COURSE_OUTCOMES_REPORT.md`](COURSE_OUTCOMES_REPORT.md).*
+
+---
+
 ## 📱 Quick Links & Downloads
 
 | Resource | Link / Access | Description |

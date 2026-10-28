@@ -50,8 +50,8 @@
     "explanation" : "HashMap allows one null key and multiple null values and is unsynchronized. Hashtable and ConcurrentHashMap do not allow null keys.",
     "points" : 2
   } ],
-  "totalQuestions" : 5,
-  "totalPoints" : 10
+  "totalPoints" : 10,
+  "totalQuestions" : 5
 }, {
   "id" : "quiz-dsa-java",
   "title" : "Data Structures & Algorithms in Java",
@@ -96,8 +96,8 @@
     "explanation" : "BFS systematically traverses nodes level by level using a FIFO Queue, finding the shortest path in unweighted graphs.",
     "points" : 1
   } ],
-  "totalQuestions" : 4,
-  "totalPoints" : 7
+  "totalPoints" : 7,
+  "totalQuestions" : 4
 }, {
   "id" : "quiz-firebase-cloud",
   "title" : "Firebase & Cloud Firestore Mastery",
@@ -142,8 +142,8 @@
     "explanation" : "Firebase Security Rules allow developers to specify granular authorization policies, ensuring users only read or write documents they are permitted to access directly from web or mobile clients.",
     "points" : 2
   } ],
-  "totalQuestions" : 4,
-  "totalPoints" : 8
+  "totalPoints" : 8,
+  "totalQuestions" : 4
 }, {
   "id" : "quiz-web-dev",
   "title" : "Modern Web Architecture & REST APIs",
@@ -180,6 +180,6 @@
     "explanation" : "JWT structure is 'header.payload.signature', encoded in Base64URL and cryptographically verifiable.",
     "points" : 1
   } ],
-  "totalQuestions" : 3,
-  "totalPoints" : 5
+  "totalPoints" : 5,
+  "totalQuestions" : 3
 } ]

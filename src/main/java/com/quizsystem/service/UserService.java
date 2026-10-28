@@ -3,6 +3,9 @@ package com.quizsystem.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.quizsystem.exception.InvalidInputException;
+import com.quizsystem.model.AdminUser;
+import com.quizsystem.model.Candidate;
 import com.quizsystem.model.User;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -12,7 +15,12 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
+/**
+ * CO-1: Demonstrates working with User, Candidate, and AdminUser classes.
+ * CO-4: Uses Java Collections and Stream API to filter, sort, and process candidates.
+ */
 @Service
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
@@ -34,12 +42,12 @@ public class UserService {
         }
         loadUsers();
 
-        // Ensure default sample student is seeded if empty
+        // Seed default demo candidate if empty
         if (usersByPhone.isEmpty()) {
-            User demoStudent = new User("usr-demo-1", "Vinay Nayak", "9876543210", "student123", "STUDENT", System.currentTimeMillis());
-            demoStudent.setExamsTaken(1);
-            demoStudent.setExamsPassed(1);
-            usersByPhone.put(demoStudent.getPhone(), demoStudent);
+            Candidate demoCandidate = new Candidate("usr-demo-1", "Vinay Nayak", "9876543210", "student123", System.currentTimeMillis());
+            demoCandidate.setExamsTaken(1);
+            demoCandidate.setExamsPassed(1);
+            usersByPhone.put(demoCandidate.getPhone(), demoCandidate);
             persistUsers();
         }
     }
@@ -68,22 +76,26 @@ public class UserService {
         }
     }
 
-    public synchronized User register(String name, String phone, String password) {
-        if (phone == null || phone.trim().isEmpty()) {
-            throw new IllegalArgumentException("Phone number is required");
+    public synchronized Candidate registerCandidate(String name, String phone, String password) {
+        if (phone == null || phone.trim().isEmpty() || !phone.trim().matches("\\d{10}")) {
+            throw new InvalidInputException("Phone number must be a valid 10-digit number");
         }
         String cleanPhone = phone.trim();
         if (usersByPhone.containsKey(cleanPhone)) {
-            throw new IllegalArgumentException("User with phone " + cleanPhone + " already registered");
+            throw new InvalidInputException("User with phone " + cleanPhone + " is already registered. Please sign in.");
         }
-        String cleanName = (name != null && !name.trim().isEmpty()) ? name.trim() : "Student";
-        String cleanPass = (password != null) ? password : "";
+        if (password == null || password.trim().length() < 4) {
+            throw new InvalidInputException("Password must be at least 4 characters long");
+        }
 
+        String cleanName = (name != null && !name.trim().isEmpty()) ? name.trim() : "Student";
         String id = "usr-" + UUID.randomUUID().toString().substring(0, 8);
-        User user = new User(id, cleanName, cleanPhone, cleanPass, "STUDENT", System.currentTimeMillis());
-        usersByPhone.put(cleanPhone, user);
+
+        Candidate candidate = new Candidate(id, cleanName, cleanPhone, password.trim(), System.currentTimeMillis());
+        usersByPhone.put(cleanPhone, candidate);
         persistUsers();
-        return user;
+        logger.info("Registered new candidate: {}", candidate.getDisplayName());
+        return candidate;
     }
 
     public Optional<User> authenticate(String identifier, String password) {
@@ -93,19 +105,19 @@ public class UserService {
         String idClean = identifier.trim();
         String passClean = password.trim();
 
-        // 1. Admin Authentication: Admin / Admin123
+        // 1. Admin Authentication: Admin / Admin123 (Subclass of User)
         if (idClean.equalsIgnoreCase("Admin") && passClean.equals("Admin123")) {
-            User admin = new User("admin-root", "Administrator", "Admin", "", "ADMIN", System.currentTimeMillis());
+            AdminUser admin = new AdminUser("admin-root", "Administrator", "Admin", "", System.currentTimeMillis(), "SUPER_ADMIN");
             return Optional.of(admin);
         }
 
-        // 2. Student Authentication by phone
+        // 2. Candidate Authentication by phone
         User user = usersByPhone.get(idClean);
         if (user != null && user.getPassword() != null && user.getPassword().equals(passClean)) {
             return Optional.of(user);
         }
 
-        // 3. Fallback: Search by name
+        // 3. Fallback search by Name
         for (User u : usersByPhone.values()) {
             if (u.getName() != null && u.getName().equalsIgnoreCase(idClean) && u.getPassword() != null && u.getPassword().equals(passClean)) {
                 return Optional.of(u);
@@ -116,19 +128,25 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        List<User> list = new ArrayList<>(usersByPhone.values());
-        list.sort(Comparator.comparingLong(User::getRegisteredAt).reversed());
-        return list;
+        return usersByPhone.values().stream()
+                .sorted(Comparator.comparingLong(User::getRegisteredAt).reversed())
+                .collect(Collectors.toCollection(ArrayList::new)); // CO-4: Stream to ArrayList
+    }
+
+    public List<Candidate> getAllCandidates() {
+        return usersByPhone.values().stream()
+                .filter(u -> u instanceof Candidate)
+                .map(u -> (Candidate) u)
+                .sorted(Comparator.comparingLong(User::getRegisteredAt).reversed())
+                .collect(Collectors.toCollection(ArrayList::new)); // CO-4: Stream to ArrayList
     }
 
     public synchronized void recordExamResult(String phone, boolean passed) {
         if (phone == null) return;
         User user = usersByPhone.get(phone.trim());
-        if (user != null) {
-            user.setExamsTaken(user.getExamsTaken() + 1);
-            if (passed) {
-                user.setExamsPassed(user.getExamsPassed() + 1);
-            }
+        if (user instanceof Candidate) {
+            Candidate candidate = (Candidate) user;
+            candidate.recordExamResult(passed);
             persistUsers();
         }
     }

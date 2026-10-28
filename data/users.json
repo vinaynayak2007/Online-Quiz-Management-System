@@ -4,7 +4,13 @@
   "phone" : "9876543210",
   "password" : "student123",
   "role" : "STUDENT",
-  "registeredAt" : 1793209360419,
-  "examsTaken" : 1,
-  "examsPassed" : 1
+  "registeredAt" : 1793210620140,
+  "studentId" : "STU-9876543210",
+  "examsTaken" : 2,
+  "examsPassed" : 1,
+  "targetCategory" : "General",
+  "displayName" : "[Student] Vinay Nayak (ID: STU-9876543210, Phone: 9876543210)",
+  "passPercentage" : 50.0,
+  "performanceStatus" : "SATISFACTORY",
+  "administrator" : false
 } ]

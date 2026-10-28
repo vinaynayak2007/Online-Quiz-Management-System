@@ -1,6 +1,7 @@
 package com.quizsystem.controller;
 
 import com.quizsystem.model.Attempt;
+import com.quizsystem.model.Candidate;
 import com.quizsystem.model.User;
 import com.quizsystem.service.AttemptService;
 import com.quizsystem.service.UserService;
@@ -39,7 +40,7 @@ public class UserController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Password is required"));
             }
 
-            User user = userService.register(name, phone, password);
+            Candidate user = userService.registerCandidate(name, phone, password);
             Map<String, Object> resp = new HashMap<>();
             resp.put("success", true);
             resp.put("id", user.getId());
