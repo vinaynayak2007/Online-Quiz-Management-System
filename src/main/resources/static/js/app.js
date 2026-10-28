@@ -1,1130 +1,1415 @@
 /**
- * QuizPulse - Online Quiz Management System
- * Client Application Logic (Java 21 Spring Boot + Firebase)
+ * QuizPulse - Unified Student Exam Portal & In-App Admin Management Studio
+ * Java 21 + Spring Boot + Google Firebase + Standalone Offline Android Client
  */
 
-class QuizApp {
+// Embedded Default Quizzes for 100% Offline Android APK & Web Compatibility
+const SEED_QUIZZES = [
+  {
+    "id": "quiz-java-core",
+    "title": "Java 21 & Object-Oriented Programming",
+    "description": "Comprehensive evaluation covering Java 21 features, Virtual Threads (Project Loom), Record Patterns, JVM memory model, and OOP principles.",
+    "category": "Java",
+    "durationMinutes": 10,
+    "passingScorePercent": 70,
+    "questions": [
+      {
+        "id": "q-j1",
+        "text": "Which of the following is true regarding Java virtual threads introduced in Project Loom?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "They map 1:1 directly to operating system kernel threads",
+          "They are lightweight threads managed by the JVM that drastically reduce memory overhead for concurrent tasks",
+          "They completely replace asynchronous reactive programming and reactive streams",
+          "They require manual operating system thread context switches"
+        ],
+        "correctAnswers": [1],
+        "points": 10,
+        "explanation": "Virtual threads are lightweight threads managed by the JVM rather than the underlying OS kernel, allowing high-throughput concurrent applications with minimal memory."
+      },
+      {
+        "id": "q-j2",
+        "text": "What does a sealed class or interface achieve in modern Java?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "It restricts which other classes or interfaces may extend or implement it via the 'permits' clause",
+          "It prevents any class from inheriting from it, exactly like the final keyword",
+          "It forces all sub-classes to be marked private",
+          "It automatically encrypts the compiled bytecode class file"
+        ],
+        "correctAnswers": [0],
+        "points": 10,
+        "explanation": "Sealed classes and interfaces restrict which other classes or interfaces may extend or implement them using the permits clause."
+      },
+      {
+        "id": "q-j3",
+        "text": "Which JVM memory region is primarily responsible for storing object instances created with the 'new' keyword?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "Metaspace",
+          "Java Heap Space",
+          "JVM Call Stack",
+          "Program Counter (PC) Register"
+        ],
+        "correctAnswers": [1],
+        "points": 10,
+        "explanation": "The Java Heap Space is the runtime data area from which memory for all class instances and arrays is allocated."
+      },
+      {
+        "id": "q-j4",
+        "text": "Which Java Stream terminal operation reduces elements into a single summary result such as a List, Set, or Map?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "flatMap()",
+          "filter()",
+          "collect()",
+          "peek()"
+        ],
+        "correctAnswers": [2],
+        "points": 10,
+        "explanation": "Stream.collect() is a terminal operation that accumulates elements into collections like List, Set, or Map using Collectors."
+      }
+    ]
+  },
+  {
+    "id": "quiz-dsa",
+    "title": "Data Structures & Algorithms",
+    "description": "Examine your proficiency in algorithmic time complexity (Big-O), balanced search trees, graph traversal, and dynamic programming.",
+    "category": "Algorithms",
+    "durationMinutes": 15,
+    "passingScorePercent": 60,
+    "questions": [
+      {
+        "id": "q-d1",
+        "text": "What is the worst-case time complexity of searching for an element in a balanced Binary Search Tree (AVL or Red-Black Tree)?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "O(1)",
+          "O(log N)",
+          "O(N)",
+          "O(N log N)"
+        ],
+        "correctAnswers": [1],
+        "points": 10,
+        "explanation": "In a balanced BST, tree height is strictly guaranteed to be O(log N), ensuring search, insert, and delete operations take O(log N) worst-case time."
+      },
+      {
+        "id": "q-d2",
+        "text": "Which data structure is fundamentally utilized by Breadth-First Search (BFS) graph traversal?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "Stack (LIFO)",
+          "Queue (FIFO)",
+          "Priority Heap",
+          "Hash Set"
+        ],
+        "correctAnswers": [1],
+        "points": 10,
+        "explanation": "BFS uses a FIFO Queue to visit graph vertices level by level."
+      },
+      {
+        "id": "q-d3",
+        "text": "Which algorithm is standard for finding the shortest path in a weighted graph with non-negative edge weights?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "Dijkstra's Algorithm",
+          "Kruskal's Algorithm",
+          "Tarjan's SCC Algorithm",
+          "Kosaraju's Algorithm"
+        ],
+        "correctAnswers": [0],
+        "points": 10,
+        "explanation": "Dijkstra's algorithm finds single-source shortest paths in weighted directed/undirected graphs with non-negative weights."
+      },
+      {
+        "id": "q-d4",
+        "text": "What is the primary characteristic that distinguishes Dynamic Programming from standard Divide and Conquer?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "Greedy choice property",
+          "Overlapping subproblems and optimal substructure",
+          "Randomized pivot selection",
+          "Strict linear time execution"
+        ],
+        "correctAnswers": [1],
+        "points": 10,
+        "explanation": "Dynamic Programming applies when a problem has optimal substructure and overlapping subproblems that can be memoized."
+      }
+    ]
+  },
+  {
+    "id": "quiz-firebase-cloud",
+    "title": "Google Firebase & Cloud Architecture",
+    "description": "Test understanding of Google Cloud Firestore, NoSQL document data modeling, Firebase Admin SDK security rules, and real-time syncing.",
+    "category": "Cloud",
+    "durationMinutes": 12,
+    "passingScorePercent": 75,
+    "questions": [
+      {
+        "id": "q-f1",
+        "text": "How does Google Cloud Firestore primarily structure and store data?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "Relational tables with foreign key constraints",
+          "Collections of documents containing key-value fields and subcollections",
+          "A monolithic JSON tree",
+          "Columnar wide-column families"
+        ],
+        "correctAnswers": [1],
+        "points": 10,
+        "explanation": "Firestore is a flexible, scalable NoSQL document database organized into collections containing documents with fields and subcollections."
+      },
+      {
+        "id": "q-f2",
+        "text": "What file format provides credentials to initialize the Firebase Admin SDK in Java applications?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "serviceAccountKey.json containing private key and client email",
+          "firebase-config.xml",
+          "id_rsa.pub SSH public key",
+          "keystore.jks"
+        ],
+        "correctAnswers": [0],
+        "points": 10,
+        "explanation": "The Google Service Account private key JSON file (serviceAccountKey.json) is used with GoogleCredentials.fromStream() to authorize the Admin SDK."
+      },
+      {
+        "id": "q-f3",
+        "text": "What is the primary benefit of Firestore offline data persistence on mobile clients?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "It permanently disables server syncing",
+          "It caches active data locally so users can read and write data seamlessly without network connectivity",
+          "It eliminates all database query costs permanently",
+          "It replaces SQLite database entirely"
+        ],
+        "correctAnswers": [1],
+        "points": 10,
+        "explanation": "Firestore offline persistence caches data locally so apps function smoothly offline and automatically reconcile changes upon reconnection."
+      },
+      {
+        "id": "q-f4",
+        "text": "In Cloud Firestore, what happens when you delete a document that has subcollections?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "All subcollections and their documents are automatically deleted recursively",
+          "The operation throws a foreign key integrity violation error",
+          "The document is deleted, but its subcollections remain orphaned unless explicitly deleted",
+          "The database reverts to the previous snapshot"
+        ],
+        "correctAnswers": [2],
+        "points": 10,
+        "explanation": "Deleting a document in Firestore does not automatically delete its subcollections; subcollections remain accessible by direct path unless explicitly deleted."
+      }
+    ]
+  },
+  {
+    "id": "quiz-web-dev",
+    "title": "Modern Full-Stack Web Development",
+    "description": "Assessment of modern HTML5 APIs, CSS Flexbox/Grid architectures, RESTful API design patterns, and Web Security (CORS/XSS).",
+    "category": "Web Dev",
+    "durationMinutes": 10,
+    "passingScorePercent": 65,
+    "questions": [
+      {
+        "id": "q-w1",
+        "text": "Which HTTP method should be used to apply partial modifications to an existing resource in RESTful API design?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "GET",
+          "POST",
+          "PATCH",
+          "PUT"
+        ],
+        "correctAnswers": [2],
+        "points": 10,
+        "explanation": "PATCH is defined by RFC 5789 for applying partial modifications to a resource, whereas PUT typically replaces the entire resource representation."
+      },
+      {
+        "id": "q-w2",
+        "text": "What browser mechanism restricts a web page from making requests to a different domain than the one that served it?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "Same-Origin Policy (SOP) and CORS headers",
+          "Content Delivery Network (CDN)",
+          "HTTP Strict Transport Security (HSTS)",
+          "DNS Prefetching"
+        ],
+        "correctAnswers": [0],
+        "points": 10,
+        "explanation": "The Same-Origin Policy is a fundamental security model in web browsers; CORS allows servers to explicitly authorize cross-origin requests."
+      },
+      {
+        "id": "q-w3",
+        "text": "Which HTML5 API allows client-side web applications to programmatically request full-screen presentation?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "Fullscreen API (element.requestFullscreen())",
+          "Screen Orientation API",
+          "Web Notification API",
+          "Service Worker API"
+        ],
+        "correctAnswers": [0],
+        "points": 10,
+        "explanation": "The Fullscreen API provides methods like Element.requestFullscreen() to present elements and entire web apps without browser UI chrome."
+      },
+      {
+        "id": "q-w4",
+        "text": "In CSS layout, what is the key difference between CSS Grid and Flexbox?",
+        "type": "SINGLE_CHOICE",
+        "options": [
+          "Flexbox is two-dimensional while CSS Grid is strictly one-dimensional",
+          "CSS Grid is two-dimensional (rows and columns) while Flexbox is primarily one-dimensional (row OR column)",
+          "Flexbox only works with table elements",
+          "CSS Grid does not support responsive breakpoints"
+        ],
+        "correctAnswers": [1],
+        "points": 10,
+        "explanation": "CSS Grid is inherently two-dimensional allowing simultaneous row and column placement, whereas Flexbox is designed for one-dimensional layouts."
+      }
+    ]
+  }
+];
+
+class AppManager {
   constructor() {
-    this.apiBase = '/api';
+    this.currentUser = null; // { role: 'STUDENT'|'ADMIN', name: '', phone: '' }
     this.quizzes = [];
-    this.currentQuiz = null;
-    this.currentQuestionIndex = 0;
-    this.studentAnswers = {}; // { questionId: [selectedIndices] }
+    this.users = [];
+    this.attempts = [];
+
+    // Active Exam State
+    this.activeQuiz = null;
+    this.currentQIndex = 0;
+    this.studentAnswers = {}; // { qId: selectedIndex }
     this.flaggedQuestions = new Set();
     this.timerInterval = null;
-    this.timeRemaining = 0; // seconds
-    this.totalTimeSpent = 0;
-    this.currentStudent = { name: 'Vinay Nayak', email: '' };
-    this.lastResult = null;
-    this.soundEnabled = true;
-    this.audioCtx = null;
+    this.secondsRemaining = 0;
+    this.cheatViolations = 0;
 
-    // Admin state
-    this.isAdminAuthenticated = false;
-    this.editorQuestions = [];
+    // Admin Editing State
+    this.editingQuestionQuizId = null;
+    this.editingQuestionId = null;
 
     this.init();
   }
 
   async init() {
-    this.initAudio();
-    this.bindEvents();
-    await this.checkFirebaseStatus();
-    await this.loadQuizzes();
-    await this.loadAnalytics();
-
-    // Support URL routing via query parameters: ?tab=admin or ?take=quiz-id
-    const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab');
-    const takeParam = params.get('take');
-
-    if (takeParam) {
-      this.pendingQuizId = takeParam;
-      this.currentStudent = { name: "Vinay Nayak", email: "vinay@example.com" };
-      await this.launchQuizPlayer();
-      this.selectOption(1);
-    } else if (tabParam) {
-      this.showTab(tabParam);
-    }
+    this.loadLocalData();
+    this.setupAntiCheatListeners();
+    this.checkSession();
   }
 
-  // --- AUDIO SYNTHESIS (Web Audio API) ---
-  initAudio() {
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        this.audioCtx = new AudioContext();
+  // --- STORAGE & INITIALIZATION ---
+  loadLocalData() {
+    // 1. Quizzes
+    const savedQuizzes = localStorage.getItem('quiz_quizzes');
+    if (savedQuizzes) {
+      try {
+        this.quizzes = JSON.parse(savedQuizzes);
+      } catch (e) {
+        this.quizzes = JSON.parse(JSON.stringify(SEED_QUIZZES));
       }
-    } catch (e) {
-      console.warn('Web Audio not supported');
-    }
-  }
-
-  playSound(type) {
-    if (!this.soundEnabled || !this.audioCtx) return;
-    if (this.audioCtx.state === 'suspended') {
-      this.audioCtx.resume();
-    }
-
-    const ctx = this.audioCtx;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    const now = ctx.currentTime;
-
-    if (type === 'click') {
-      osc.frequency.setValueAtTime(440, now);
-      gain.gain.setValueAtTime(0.05, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-      osc.start(now);
-      osc.stop(now + 0.05);
-    } else if (type === 'success') {
-      // Major chord arpeggio
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(523.25, now); // C5
-      osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-      osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
-      gain.gain.setValueAtTime(0.1, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-      osc.start(now);
-      osc.stop(now + 0.5);
-    } else if (type === 'fail') {
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(260, now);
-      osc.frequency.linearRampToValueAtTime(160, now + 0.3);
-      gain.gain.setValueAtTime(0.1, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      osc.start(now);
-      osc.stop(now + 0.35);
-    } else if (type === 'warning') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, now);
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-      osc.start(now);
-      osc.stop(now + 0.1);
-    }
-  }
-
-  toggleSound() {
-    this.soundEnabled = !this.soundEnabled;
-    const onIcon = document.getElementById('sound-icon-on');
-    const offIcon = document.getElementById('sound-icon-off');
-    if (this.soundEnabled) {
-      onIcon.classList.remove('hidden');
-      offIcon.classList.add('hidden');
-      this.showToast('Sound effects enabled', '🔊');
     } else {
-      onIcon.classList.add('hidden');
-      offIcon.classList.remove('hidden');
-      this.showToast('Sound muted', '🔇');
+      this.quizzes = JSON.parse(JSON.stringify(SEED_QUIZZES));
+      this.saveQuizzesLocal();
     }
-  }
 
-  // --- TAB ROUTING ---
-  showTab(tabName) {
-    const views = ['browse', 'runner', 'result', 'leaderboard', 'history', 'admin'];
-    views.forEach(v => {
-      const el = document.getElementById(`view-${v}`);
-      if (el) el.classList.add('hidden');
-      const navBtn = document.getElementById(`nav-${v}`);
-      if (navBtn) navBtn.classList.remove('active');
-    });
-
-    const activeView = document.getElementById(`view-${tabName}`);
-    if (activeView) activeView.classList.remove('hidden');
-
-    const activeNav = document.getElementById(`nav-${tabName}`);
-    if (activeNav) activeNav.classList.add('active');
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    if (tabName === 'browse') {
-      this.loadQuizzes();
-      this.loadAnalytics();
-    } else if (tabName === 'leaderboard') {
-      this.loadLeaderboard();
-    } else if (tabName === 'history') {
-      this.loadHistory();
-    } else if (tabName === 'admin') {
-      this.loadAdminQuizzes();
-    }
-  }
-
-  // --- FIREBASE STATUS ---
-  async checkFirebaseStatus() {
-    try {
-      const res = await fetch(`${this.apiBase}/firebase/status`);
-      if (res.ok) {
-        const data = await res.json();
-        const pillText = document.getElementById('firebase-pill-text');
-        const pill = document.getElementById('firebase-status-pill');
-
-        if (data.connected) {
-          pillText.textContent = `Firebase: ${data.projectId}`;
-          pill.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/40 transition';
-        } else {
-          pillText.textContent = 'Firebase: Local Emulated';
-          pill.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/40 transition';
+    // 2. Registered Users
+    const savedUsers = localStorage.getItem('quiz_registered_users');
+    if (savedUsers) {
+      try {
+        this.users = JSON.parse(savedUsers);
+      } catch (e) {
+        this.users = [];
+      }
+    } else {
+      // Default initial sample user: Vinay Nayak
+      this.users = [
+        {
+          id: 'usr-1',
+          name: 'Vinay Nayak',
+          phone: '9876543210',
+          password: 'student123',
+          role: 'STUDENT',
+          registeredAt: Date.now() - 86400000,
+          examsTaken: 1,
+          examsPassed: 1
         }
+      ];
+      this.saveUsersLocal();
+    }
 
-        // Update modal info
-        document.getElementById('fb-modal-mode').textContent = data.mode;
-        document.getElementById('fb-modal-db').textContent = data.database;
-        document.getElementById('fb-modal-project').textContent = data.projectId;
-        document.getElementById('fb-modal-message').textContent = data.message;
+    // 3. Exam Attempts
+    const savedAttempts = localStorage.getItem('quiz_user_attempts');
+    if (savedAttempts) {
+      try {
+        this.attempts = JSON.parse(savedAttempts);
+      } catch (e) {
+        this.attempts = [];
       }
-    } catch (e) {
-      console.warn('Could not query Firebase status:', e);
+    } else {
+      // Default initial attempt
+      this.attempts = [
+        {
+          id: 'att-sample-1',
+          quizId: 'quiz-java-core',
+          quizTitle: 'Java 21 & Object-Oriented Programming',
+          studentName: 'Vinay Nayak',
+          studentPhone: '9876543210',
+          score: 30,
+          totalPoints: 40,
+          percentage: 75.0,
+          passed: true,
+          passingScorePercent: 70,
+          timestamp: Date.now() - 3600000
+        }
+      ];
+      this.saveAttemptsLocal();
     }
   }
 
-  openFirebaseModal() {
-    document.getElementById('modal-firebase').classList.remove('hidden');
+  saveQuizzesLocal() {
+    localStorage.setItem('quiz_quizzes', JSON.stringify(this.quizzes));
+  }
+  saveUsersLocal() {
+    localStorage.setItem('quiz_registered_users', JSON.stringify(this.users));
+  }
+  saveAttemptsLocal() {
+    localStorage.setItem('quiz_user_attempts', JSON.stringify(this.attempts));
   }
 
-  closeFirebaseModal() {
-    document.getElementById('modal-firebase').classList.add('hidden');
+  // --- AUTHENTICATION FLOW ---
+  checkSession() {
+    const sessionUser = localStorage.getItem('quiz_session_user');
+    if (sessionUser) {
+      try {
+        this.currentUser = JSON.parse(sessionUser);
+        this.renderUserInterface();
+        return;
+      } catch (e) {}
+    }
+    // Show auth view by default
+    this.showView('auth-view');
   }
 
-  async submitFirebaseConfig() {
-    const credInput = document.getElementById('firebase-credentials-input').value.trim();
-    if (!credInput) {
-      this.showToast('Please paste your Firebase service account JSON', '⚠️');
+  setAuthTab(tab) {
+    const loginBtn = document.getElementById('tab-login-btn');
+    const registerBtn = document.getElementById('tab-register-btn');
+    const formLogin = document.getElementById('form-login');
+    const formRegister = document.getElementById('form-register');
+
+    if (tab === 'login') {
+      loginBtn.classList.add('active');
+      registerBtn.classList.remove('active');
+      formLogin.style.display = 'block';
+      formRegister.style.display = 'none';
+    } else {
+      registerBtn.classList.add('active');
+      loginBtn.classList.remove('active');
+      formRegister.style.display = 'block';
+      formLogin.style.display = 'none';
+    }
+  }
+
+  fillAdminCredentials() {
+    document.getElementById('login-identifier').value = 'Admin';
+    document.getElementById('login-password').value = 'Admin123';
+  }
+
+  fillDemoStudentCredentials() {
+    document.getElementById('login-identifier').value = '9876543210';
+    document.getElementById('login-password').value = 'student123';
+  }
+
+  handleLogin(e) {
+    e.preventDefault();
+    const idField = document.getElementById('login-identifier').value.trim();
+    const passField = document.getElementById('login-password').value.trim();
+
+    // 1. Check for Admin Login: Admin / Admin123
+    if (idField.toLowerCase() === 'admin' && passField === 'Admin123') {
+      this.currentUser = {
+        role: 'ADMIN',
+        name: 'Administrator',
+        phone: 'Admin'
+      };
+      localStorage.setItem('quiz_session_user', JSON.stringify(this.currentUser));
+      this.showToast('🛡️ Welcome, Administrator!');
+      this.renderUserInterface();
       return;
     }
 
-    try {
-      const res = await fetch(`${this.apiBase}/firebase/configure`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credentials: credInput })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        this.showToast('Firebase configured successfully!', '🔥');
-        this.closeFirebaseModal();
-        await this.checkFirebaseStatus();
-        await this.loadQuizzes();
-      } else {
-        alert(data.error || 'Failed to initialize Firebase credentials');
-      }
-    } catch (e) {
-      alert('Error sending credentials: ' + e.message);
-    }
-  }
+    // 2. Check for Registered Student Login
+    const user = this.users.find(u =>
+      (u.phone === idField || u.name.toLowerCase() === idField.toLowerCase()) &&
+      u.password === passField
+    );
 
-  // --- DATA LOADING & CATALOG ---
-  async loadQuizzes() {
-    try {
-      const res = await fetch(`${this.apiBase}/quizzes`);
-      if (res.ok) {
-        this.quizzes = await res.json();
-        this.populateCategories();
-        this.renderQuizzesGrid(this.quizzes);
-      }
-    } catch (e) {
-      console.error('Failed to load quizzes:', e);
-    }
-  }
-
-  async loadAnalytics() {
-    try {
-      const res = await fetch(`${this.apiBase}/analytics`);
-      if (res.ok) {
-        const data = await res.json();
-        document.getElementById('stat-total-quizzes').textContent = data.totalQuizzes || 0;
-        document.getElementById('stat-total-questions').textContent = data.totalQuestions || 0;
-        document.getElementById('stat-total-attempts').textContent = data.totalAttempts || 0;
-        document.getElementById('stat-avg-score').textContent = (data.averageScore || 0) + '%';
-
-        // Admin stats
-        document.getElementById('admin-stat-quizzes').textContent = data.totalQuizzes || 0;
-        document.getElementById('admin-stat-questions').textContent = data.totalQuestions || 0;
-        document.getElementById('admin-stat-attempts').textContent = data.totalAttempts || 0;
-        document.getElementById('admin-stat-passrate').textContent = (data.passRate || 0) + '%';
-      }
-    } catch (e) {
-      console.error('Failed to load analytics:', e);
-    }
-  }
-
-  populateCategories() {
-    const categories = new Set(this.quizzes.map(q => q.category).filter(Boolean));
-    const catSelect = document.getElementById('quiz-category-filter');
-    const currentVal = catSelect.value;
-    catSelect.innerHTML = '<option value="all">All Categories</option>';
-    categories.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      opt.textContent = cat;
-      catSelect.appendChild(opt);
-    });
-    catSelect.value = currentVal;
-  }
-
-  filterQuizzes() {
-    const query = (document.getElementById('quiz-search-input').value || '').toLowerCase();
-    const category = document.getElementById('quiz-category-filter').value;
-    const difficulty = document.getElementById('quiz-difficulty-filter').value;
-
-    const filtered = this.quizzes.filter(q => {
-      const matchesQuery = !query ||
-        q.title.toLowerCase().includes(query) ||
-        (q.description && q.description.toLowerCase().includes(query)) ||
-        (q.category && q.category.toLowerCase().includes(query)) ||
-        (q.tags && q.tags.some(t => t.toLowerCase().includes(query)));
-
-      const matchesCat = category === 'all' || (q.category && q.category.toLowerCase() === category.toLowerCase());
-      const matchesDiff = difficulty === 'all' || (q.difficulty && q.difficulty.toLowerCase() === difficulty.toLowerCase());
-
-      return matchesQuery && matchesCat && matchesDiff;
-    });
-
-    this.renderQuizzesGrid(filtered);
-  }
-
-  renderQuizzesGrid(list) {
-    const container = document.getElementById('quizzes-grid');
-    const emptyNotice = document.getElementById('no-quizzes-found');
-
-    if (!list || list.length === 0) {
-      container.innerHTML = '';
-      emptyNotice.classList.remove('hidden');
+    if (user) {
+      this.currentUser = {
+        role: 'STUDENT',
+        name: user.name,
+        phone: user.phone
+      };
+      localStorage.setItem('quiz_session_user', JSON.stringify(this.currentUser));
+      this.showToast(`👋 Welcome back, ${user.name}!`);
+      this.renderUserInterface();
       return;
     }
 
-    emptyNotice.classList.add('hidden');
-    container.innerHTML = list.map(q => {
-      const diffColor = q.difficulty === 'Beginner' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' :
-                        q.difficulty === 'Advanced' ? 'text-rose-400 bg-rose-500/10 border-rose-500/20' :
-                        'text-amber-400 bg-amber-500/10 border-amber-500/20';
+    alert('❌ Invalid Credentials!\n\n• For Admin: Username "Admin" & Password "Admin123"\n• For Student: Please enter your registered phone number & password, or switch to the Register tab.');
+  }
 
-      const tagHtml = (q.tags || []).slice(0, 3).map(t =>
-        `<span class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">#${t}</span>`
-      ).join('');
+  handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const password = document.getElementById('reg-password').value.trim();
 
-      return `
-        <div class="group bg-slate-800/80 hover:bg-slate-800 rounded-3xl border border-slate-700/80 hover:border-indigo-500/50 p-6 flex flex-col justify-between transition-all duration-200 shadow-xl hover:shadow-indigo-500/10">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                ${q.category || 'General'}
-              </span>
-              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full border ${diffColor}">
-                ${q.difficulty || 'Intermediate'}
-              </span>
+    if (!name || !phone || !password) {
+      alert('Please fill out all registration fields.');
+      return;
+    }
+
+    // Check if phone already registered
+    if (this.users.some(u => u.phone === phone)) {
+      alert('A user with this phone number already exists! Please sign in.');
+      this.setAuthTab('login');
+      document.getElementById('login-identifier').value = phone;
+      return;
+    }
+
+    const newUser = {
+      id: 'usr-' + Date.now(),
+      name: name,
+      phone: phone,
+      password: password,
+      role: 'STUDENT',
+      registeredAt: Date.now(),
+      examsTaken: 0,
+      examsPassed: 0
+    };
+
+    this.users.unshift(newUser);
+    this.saveUsersLocal();
+
+    // Sync to backend if online
+    fetch('/api/users/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, password })
+    }).catch(() => {});
+
+    // Auto login
+    this.currentUser = {
+      role: 'STUDENT',
+      name: newUser.name,
+      phone: newUser.phone
+    };
+    localStorage.setItem('quiz_session_user', JSON.stringify(this.currentUser));
+    this.showToast('🎉 Registration Successful! Welcome to QuizPulse.');
+    this.renderUserInterface();
+  }
+
+  logout() {
+    this.currentUser = null;
+    localStorage.removeItem('quiz_session_user');
+    document.getElementById('logged-in-controls').style.display = 'none';
+    document.getElementById('user-greeting-sub').textContent = 'Secure Exam Assessment System';
+    this.showView('auth-view');
+    this.showToast('Logged out successfully.');
+  }
+
+  // --- VIEW ROUTING ---
+  showView(viewId) {
+    document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+    const target = document.getElementById(viewId);
+    if (target) {
+      target.classList.add('active');
+    }
+  }
+
+  renderUserInterface() {
+    if (!this.currentUser) {
+      this.showView('auth-view');
+      return;
+    }
+
+    const ctrl = document.getElementById('logged-in-controls');
+    const pill = document.getElementById('user-display-pill');
+    const sub = document.getElementById('user-greeting-sub');
+
+    ctrl.style.display = 'flex';
+    pill.textContent = `${this.currentUser.role === 'ADMIN' ? '🛡️ Admin' : '👤'} ${this.currentUser.name}`;
+
+    if (this.currentUser.role === 'ADMIN') {
+      sub.textContent = 'Admin Control Studio';
+      this.renderAdminView();
+      this.showView('admin-view');
+    } else {
+      sub.textContent = `Student: ${this.currentUser.name} (${this.currentUser.phone})`;
+      this.renderStudentView();
+      this.showView('student-view');
+    }
+  }
+
+  navigateHome() {
+    if (!this.currentUser) {
+      this.showView('auth-view');
+    } else if (this.currentUser.role === 'ADMIN') {
+      this.showView('admin-view');
+    } else {
+      this.showView('student-view');
+    }
+  }
+
+  // --- STUDENT EXAM VIEW ("after login exam name show") ---
+  renderStudentView() {
+    const container = document.getElementById('exam-catalog-grid');
+    container.innerHTML = '';
+    document.getElementById('student-exam-count').textContent = this.quizzes.length;
+
+    this.quizzes.forEach(quiz => {
+      // Find candidate's last attempt on this quiz
+      const userAttempt = this.attempts.find(a =>
+        a.quizId === quiz.id && (a.studentPhone === this.currentUser.phone || a.studentName === this.currentUser.name)
+      );
+
+      const card = document.createElement('div');
+      card.className = 'exam-card';
+
+      let statusBadge = '';
+      if (userAttempt) {
+        if (userAttempt.passed) {
+          statusBadge = `<span class="badge badge-passed" style="margin-left:auto;">PASSED (${userAttempt.percentage}%)</span>`;
+        } else {
+          statusBadge = `<span class="badge badge-failed" style="margin-left:auto;">FAILED (${userAttempt.percentage}%)</span>`;
+        }
+      }
+
+      card.innerHTML = `
+        <div>
+          <div style="display:flex; align-items:center;">
+            <span class="exam-badge">${quiz.category || 'EXAM'}</span>
+            ${statusBadge}
+          </div>
+          <h3 class="exam-title">${quiz.title}</h3>
+          <p class="exam-desc">${quiz.description || 'Test your proficiency and earn verified certification.'}</p>
+        </div>
+
+        <div>
+          <div class="exam-meta">
+            <div class="exam-meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>${quiz.durationMinutes || 10} Mins</span>
             </div>
-
-            <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition line-clamp-1">
-              ${q.title}
-            </h3>
-
-            <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed">
-              ${q.description || 'Interactive test designed to assess fundamental and advanced core competencies.'}
-            </p>
-
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              ${tagHtml}
+            <div class="exam-meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>${quiz.questions.length} Questions</span>
+            </div>
+            <div class="exam-meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Pass: ${quiz.passingScorePercent || 70}%</span>
             </div>
           </div>
 
-          <div class="pt-6 mt-6 border-t border-slate-700/60 flex items-center justify-between">
-            <div class="flex items-center gap-4 text-xs text-slate-400">
-              <span class="flex items-center gap-1.5 font-medium">
-                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                ${q.totalQuestions || (q.questions ? q.questions.length : 0)} Questions
-              </span>
-              <span class="flex items-center gap-1.5 font-medium">
-                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                ${q.durationMinutes || 10} Mins
-              </span>
-            </div>
-
-            <button onclick="app.promptStudentInfo('${q.id}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5">
-              <span>Start</span>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-            </button>
-          </div>
+          <button onclick="app.startExam('${quiz.id}')" class="btn btn-primary" style="width:100%; padding:10px;">
+            🚀 Start Exam (Full Screen Mode)
+          </button>
         </div>
       `;
-    }).join('');
+      container.appendChild(card);
+    });
+
+    this.renderStudentHistory();
   }
 
-  startRandomQuiz() {
-    if (this.quizzes.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * this.quizzes.length);
-    this.promptStudentInfo(this.quizzes[randomIndex].id);
-  }
+  renderStudentHistory() {
+    const tbody = document.getElementById('student-history-tbody');
+    tbody.innerHTML = '';
 
-  // --- STUDENT PROMPT & QUIZ INITIALIZATION ---
-  promptStudentInfo(quizId) {
-    const quiz = this.quizzes.find(q => q.id === quizId);
-    if (!quiz) return;
+    const myAttempts = this.attempts.filter(a =>
+      a.studentPhone === this.currentUser.phone || a.studentName === this.currentUser.name
+    );
 
-    this.pendingQuizId = quizId;
-    document.getElementById('modal-student-info').classList.remove('hidden');
-    document.getElementById('student-name-input').focus();
-  }
-
-  closeStudentModal() {
-    document.getElementById('modal-student-info').classList.add('hidden');
-    this.pendingQuizId = null;
-  }
-
-  async launchQuizPlayer() {
-    const nameInput = document.getElementById('student-name-input').value.trim();
-    const emailInput = document.getElementById('student-email-input').value.trim();
-
-    if (!nameInput) {
-      alert('Please enter your full name to proceed with the assessment.');
+    if (myAttempts.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:#94a3b8;">No exams attempted yet. Choose an examination above to begin!</td></tr>`;
       return;
     }
 
-    this.currentStudent = { name: nameInput, email: emailInput };
-    this.closeStudentModal();
+    myAttempts.forEach(att => {
+      const tr = document.createElement('tr');
+      const passBadge = att.passed
+        ? `<span class="badge badge-passed">PASSED ✅</span>`
+        : `<span class="badge badge-failed">FAILED ❌</span>`;
 
+      tr.innerHTML = `
+        <td style="font-weight:600; color:white;">${att.quizTitle}</td>
+        <td style="font-weight:700;">${att.percentage}% (${att.score}/${att.totalPoints} pts)</td>
+        <td>${att.passingScorePercent || 70}%</td>
+        <td>${passBadge}</td>
+        <td style="color:#94a3b8;">${new Date(att.timestamp).toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // --- FULL SCREEN STRICT EXAM RUNNER ("full screen make no tab change nothing") ---
+  startExam(quizId) {
+    const quiz = this.quizzes.find(q => q.id === quizId);
+    if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+      alert('Selected exam does not contain any questions.');
+      return;
+    }
+
+    this.activeQuiz = quiz;
+    this.currentQIndex = 0;
+    this.studentAnswers = {};
+    this.flaggedQuestions.clear();
+    this.cheatViolations = 0;
+    this.secondsRemaining = (quiz.durationMinutes || 10) * 60;
+
+    // Trigger Fullscreen
+    this.enterStrictFullscreen();
+
+    // Notify Android App via Javascript bridge
+    if (window.AndroidApp && typeof window.AndroidApp.setExamActive === 'function') {
+      window.AndroidApp.setExamActive(true);
+    }
+
+    // Show Exam Runner View
+    document.getElementById('runner-exam-title').textContent = quiz.title;
+    document.getElementById('runner-exam-category').textContent = quiz.category || 'EXAM';
+    document.getElementById('exam-runner-view').classList.add('active');
+
+    this.renderQuestionGrid();
+    this.renderActiveQuestion();
+    this.startTimer();
+  }
+
+  enterStrictFullscreen() {
     try {
-      const res = await fetch(`${this.apiBase}/quizzes/${this.pendingQuizId}`);
-      if (!res.ok) throw new Error('Could not fetch quiz details');
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen().catch(() => {});
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      } else if (docEl.msRequestFullscreen) {
+        docEl.msRequestFullscreen();
+      }
+    } catch (e) {}
 
-      this.currentQuiz = await res.json();
-      this.currentQuestionIndex = 0;
-      this.studentAnswers = {};
-      this.flaggedQuestions.clear();
-      this.timeRemaining = (this.currentQuiz.durationMinutes || 10) * 60;
-      this.totalTimeSpent = 0;
-
-      this.showTab('runner');
-      this.startTimer();
-      this.renderCurrentQuestion();
-      this.renderQuestionPalette();
-      this.playSound('click');
-    } catch (e) {
-      alert('Error launching quiz: ' + e.message);
+    if (window.AndroidApp && typeof window.AndroidApp.enterFullscreen === 'function') {
+      window.AndroidApp.enterFullscreen();
     }
   }
 
-  // --- TIMER ENGINE ---
+  setupAntiCheatListeners() {
+    // 1. Visibility change listener (tab change / minimize)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this.activeQuiz) {
+        this.triggerCheatAlert();
+      }
+    });
+
+    // 2. Window blur listener (switching away from window)
+    window.addEventListener('blur', () => {
+      if (this.activeQuiz) {
+        this.triggerCheatAlert();
+      }
+    });
+  }
+
+  triggerCheatAlert() {
+    if (!this.activeQuiz) return;
+    this.cheatViolations++;
+    document.getElementById('cheat-violation-count').textContent = this.cheatViolations;
+    document.getElementById('anti-cheat-overlay').classList.add('active');
+
+    // Beep sound
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+      osc.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {}
+  }
+
+  dismissCheatWarning() {
+    document.getElementById('anti-cheat-overlay').classList.remove('active');
+    this.enterStrictFullscreen();
+  }
+
   startTimer() {
     if (this.timerInterval) clearInterval(this.timerInterval);
-
     this.updateTimerDisplay();
+
     this.timerInterval = setInterval(() => {
-      this.timeRemaining--;
-      this.totalTimeSpent++;
+      this.secondsRemaining--;
       this.updateTimerDisplay();
 
-      if (this.timeRemaining === 60) {
-        this.playSound('warning');
-        this.showToast('1 minute remaining! Review your answers.', '⚠️');
-      }
-
-      if (this.timeRemaining <= 0) {
+      if (this.secondsRemaining <= 0) {
         clearInterval(this.timerInterval);
-        this.showToast('Time has expired! Submitting assessment...', '⏰');
-        this.submitQuiz();
+        alert('⏰ Time Expired! Your exam will be submitted automatically.');
+        this.submitExam();
       }
     }, 1000);
   }
 
   updateTimerDisplay() {
-    const m = Math.floor(Math.max(0, this.timeRemaining) / 60);
-    const s = Math.max(0, this.timeRemaining) % 60;
-    const formatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    const mins = Math.floor(this.secondsRemaining / 60);
+    const secs = this.secondsRemaining % 60;
+    const str = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    const box = document.getElementById('runner-timer-box');
+    const text = document.getElementById('runner-timer-text');
+    text.textContent = str;
 
-    const textEl = document.getElementById('player-timer-text');
-    const container = document.getElementById('player-timer-container');
-    if (textEl) textEl.textContent = formatted;
-
-    if (this.timeRemaining < 60) {
-      container.className = 'flex items-center gap-2 bg-rose-950/80 border border-rose-500/60 px-4 py-2 rounded-xl text-rose-300 animate-pulse';
+    if (this.secondsRemaining <= 60) {
+      box.classList.add('urgent');
     } else {
-      container.className = 'flex items-center gap-2 bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-slate-100';
+      box.classList.remove('urgent');
     }
   }
 
-  // --- QUESTION RENDERING & SELECTION ---
-  renderCurrentQuestion() {
-    if (!this.currentQuiz || !this.currentQuiz.questions || this.currentQuiz.questions.length === 0) return;
+  renderQuestionGrid() {
+    const grid = document.getElementById('runner-question-grid');
+    grid.innerHTML = '';
 
-    const questions = this.currentQuiz.questions;
-    const q = questions[this.currentQuestionIndex];
+    this.activeQuiz.questions.forEach((q, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'grid-btn';
+      if (idx === this.currentQIndex) btn.classList.add('current');
+      if (this.studentAnswers[q.id] !== undefined) btn.classList.add('answered');
+      if (this.flaggedQuestions.has(q.id)) btn.classList.add('flagged');
 
-    // Header info
-    document.getElementById('player-quiz-title').textContent = this.currentQuiz.title;
-    document.getElementById('player-category-badge').textContent = this.currentQuiz.category || 'General';
-    document.getElementById('player-difficulty-badge').textContent = this.currentQuiz.difficulty || 'Intermediate';
-
-    document.getElementById('player-question-counter').textContent = `Question ${this.currentQuestionIndex + 1} of ${questions.length}`;
-    document.getElementById('player-question-points').textContent = `${q.points || 1} ${q.points === 1 ? 'pt' : 'pts'}`;
-    document.getElementById('player-question-text').textContent = q.text;
-
-    // Linear progress bar
-    const progress = Math.round(((this.currentQuestionIndex + 1) / questions.length) * 100);
-    document.getElementById('player-progress-bar').style.width = `${progress}%`;
-
-    // Flag button state
-    const flagBtn = document.getElementById('flag-btn');
-    if (this.flaggedQuestions.has(q.id)) {
-      flagBtn.className = 'p-2.5 rounded-xl bg-amber-500/20 border border-amber-500 text-amber-400 transition';
-    } else {
-      flagBtn.className = 'p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-amber-400 hover:border-amber-500/40 transition';
-    }
-
-    // Render options
-    const optionsContainer = document.getElementById('player-options-list');
-    const selectedList = this.studentAnswers[q.id] || [];
-    const isMulti = q.type === 'MULTIPLE_CHOICE';
-
-    optionsContainer.innerHTML = (q.options || []).map((opt, idx) => {
-      const isSelected = selectedList.includes(idx);
-      const letter = String.fromCharCode(65 + idx);
-
-      return `
-        <div onclick="app.selectOption(${idx})" class="quiz-option-card flex items-center justify-between p-4 rounded-2xl ${isSelected ? 'selected' : ''}">
-          <div class="flex items-center gap-3">
-            <span class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
-              ${letter}
-            </span>
-            <span class="text-sm font-medium ${isSelected ? 'text-white' : 'text-slate-200'}">${opt}</span>
-          </div>
-          <div class="w-5 h-5 rounded-${isMulti ? 'md' : 'full'} border flex items-center justify-center ${isSelected ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-slate-600'}">
-            ${isSelected ? (isMulti ? '✓' : '●') : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    // Previous / Next / Submit buttons
-    const prevBtn = document.getElementById('player-prev-btn');
-    const nextBtn = document.getElementById('player-next-btn');
-    const submitBtn = document.getElementById('player-submit-btn');
-
-    prevBtn.disabled = this.currentQuestionIndex === 0;
-
-    if (this.currentQuestionIndex === questions.length - 1) {
-      nextBtn.classList.add('hidden');
-      submitBtn.classList.remove('hidden');
-    } else {
-      nextBtn.classList.remove('hidden');
-      submitBtn.classList.add('hidden');
-    }
-
-    this.renderQuestionPalette();
+      btn.textContent = idx + 1;
+      btn.onclick = () => this.jumpToQuestion(idx);
+      grid.appendChild(btn);
+    });
   }
 
-  selectOption(optionIndex) {
-    const q = this.currentQuiz.questions[this.currentQuestionIndex];
-    const isMulti = q.type === 'MULTIPLE_CHOICE';
+  renderActiveQuestion() {
+    const q = this.activeQuiz.questions[this.currentQIndex];
+    document.getElementById('runner-q-index').textContent = `Question ${this.currentQIndex + 1} of ${this.activeQuiz.questions.length}`;
+    document.getElementById('runner-q-points').textContent = `${q.points || 10} Points`;
+    document.getElementById('runner-q-statement').textContent = q.text;
 
-    let selected = this.studentAnswers[q.id] ? [...this.studentAnswers[q.id]] : [];
+    // Flag button text
+    const isFlagged = this.flaggedQuestions.has(q.id);
+    document.getElementById('flag-btn-text').textContent = isFlagged ? 'Flagged for Review' : 'Flag for Review';
+    document.getElementById('runner-flag-btn').style.borderColor = isFlagged ? 'var(--warning)' : '#334155';
 
-    if (isMulti) {
-      if (selected.includes(optionIndex)) {
-        selected = selected.filter(i => i !== optionIndex);
-      } else {
-        selected.push(optionIndex);
+    // Prev / Next button state
+    document.getElementById('runner-prev-btn').disabled = (this.currentQIndex === 0);
+    document.getElementById('runner-next-btn').textContent = (this.currentQIndex === this.activeQuiz.questions.length - 1) ? 'Review / Finish' : 'Next Question';
+
+    // Options list
+    const optionsContainer = document.getElementById('runner-options-list');
+    optionsContainer.innerHTML = '';
+
+    const selectedOption = this.studentAnswers[q.id];
+
+    q.options.forEach((optText, optIdx) => {
+      const optDiv = document.createElement('div');
+      optDiv.className = 'option-item';
+      if (selectedOption === optIdx) {
+        optDiv.classList.add('selected');
       }
-    } else {
-      selected = [optionIndex];
-    }
 
-    this.studentAnswers[q.id] = selected;
-    this.playSound('click');
-    this.renderCurrentQuestion();
+      optDiv.onclick = () => this.selectOption(optIdx);
+
+      const marker = String.fromCharCode(65 + optIdx); // A, B, C, D
+      optDiv.innerHTML = `
+        <div class="option-marker">${marker}</div>
+        <div style="font-size:15px; color:#e2e8f0; line-height:1.4;">${optText}</div>
+      `;
+      optionsContainer.appendChild(optDiv);
+    });
+
+    this.renderQuestionGrid();
   }
 
-  clearSelection() {
-    const q = this.currentQuiz.questions[this.currentQuestionIndex];
-    delete this.studentAnswers[q.id];
-    this.renderCurrentQuestion();
+  selectOption(optIdx) {
+    const q = this.activeQuiz.questions[this.currentQIndex];
+    this.studentAnswers[q.id] = optIdx;
+    this.renderActiveQuestion();
   }
 
-  toggleFlagCurrentQuestion() {
-    const q = this.currentQuiz.questions[this.currentQuestionIndex];
+  toggleFlagQuestion() {
+    const q = this.activeQuiz.questions[this.currentQIndex];
     if (this.flaggedQuestions.has(q.id)) {
       this.flaggedQuestions.delete(q.id);
     } else {
       this.flaggedQuestions.add(q.id);
-      this.playSound('warning');
     }
-    this.renderCurrentQuestion();
+    this.renderActiveQuestion();
   }
 
   nextQuestion() {
-    if (this.currentQuestionIndex < this.currentQuiz.questions.length - 1) {
-      this.currentQuestionIndex++;
-      this.playSound('click');
-      this.renderCurrentQuestion();
+    if (this.currentQIndex < this.activeQuiz.questions.length - 1) {
+      this.currentQIndex++;
+      this.renderActiveQuestion();
+    } else {
+      this.confirmSubmitExam();
     }
   }
 
   prevQuestion() {
-    if (this.currentQuestionIndex > 0) {
-      this.currentQuestionIndex--;
-      this.playSound('click');
-      this.renderCurrentQuestion();
+    if (this.currentQIndex > 0) {
+      this.currentQIndex--;
+      this.renderActiveQuestion();
     }
   }
 
-  jumpToQuestion(index) {
-    if (index >= 0 && index < this.currentQuiz.questions.length) {
-      this.currentQuestionIndex = index;
-      this.playSound('click');
-      this.renderCurrentQuestion();
+  jumpToQuestion(idx) {
+    this.currentQIndex = idx;
+    this.renderActiveQuestion();
+  }
+
+  confirmSubmitExam() {
+    const answeredCount = Object.keys(this.studentAnswers).length;
+    const totalCount = this.activeQuiz.questions.length;
+    const unanswered = totalCount - answeredCount;
+
+    let msg = `Are you sure you want to submit your exam?\n\n• Answered: ${answeredCount}/${totalCount}\n`;
+    if (unanswered > 0) {
+      msg += `⚠️ You still have ${unanswered} UNANSWERED questions!\n`;
+    }
+
+    if (confirm(msg)) {
+      this.submitExam();
     }
   }
 
-  renderQuestionPalette() {
-    const paletteGrid = document.getElementById('player-palette-grid');
-    if (!paletteGrid || !this.currentQuiz || !this.currentQuiz.questions) return;
+  submitExam() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
 
-    paletteGrid.innerHTML = this.currentQuiz.questions.map((q, idx) => {
-      const isAnswered = this.studentAnswers[q.id] && this.studentAnswers[q.id].length > 0;
-      const isFlagged = this.flaggedQuestions.has(q.id);
-      const isCurrent = idx === this.currentQuestionIndex;
+    // Calculate score
+    let score = 0;
+    let totalPoints = 0;
+    let correctCount = 0;
+    const evaluations = [];
 
-      let cls = 'palette-btn ';
-      if (isFlagged) {
-        cls += 'flagged ';
-      } else if (isAnswered) {
-        cls += 'answered ';
-      } else {
-        cls += 'unanswered ';
+    this.activeQuiz.questions.forEach(q => {
+      const qPoints = q.points || 10;
+      totalPoints += qPoints;
+
+      const userChoice = this.studentAnswers[q.id];
+      const correctChoice = (q.correctAnswers && q.correctAnswers.length > 0) ? q.correctAnswers[0] : 0;
+      const isCorrect = (userChoice !== undefined && userChoice === correctChoice);
+
+      if (isCorrect) {
+        score += qPoints;
+        correctCount++;
       }
 
-      if (isCurrent) {
-        cls += 'current ';
-      }
+      evaluations.push({
+        qText: q.text,
+        userChoice: userChoice,
+        correctChoice: correctChoice,
+        options: q.options,
+        isCorrect: isCorrect,
+        explanation: q.explanation || ''
+      });
+    });
 
-      return `<button onclick="app.jumpToQuestion(${idx})" class="${cls}">${idx + 1}</button>`;
-    }).join('');
-  }
+    const percentage = Math.round((score / totalPoints) * 100);
+    const passThreshold = this.activeQuiz.passingScorePercent || 70;
+    const passed = (percentage >= passThreshold);
 
-  confirmSubmitQuiz() {
-    const questions = this.currentQuiz.questions;
-    const answeredCount = Object.keys(this.studentAnswers).filter(k => this.studentAnswers[k].length > 0).length;
-    const unansweredCount = questions.length - answeredCount;
-
-    if (unansweredCount > 0) {
-      if (!confirm(`You have ${unansweredCount} unanswered question(s). Are you sure you want to finish and submit?`)) {
-        return;
-      }
-    }
-    this.submitQuiz();
-  }
-
-  async submitQuiz() {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-      this.timerInterval = null;
-    }
-
-    const payload = {
-      studentName: this.currentStudent.name,
-      studentEmail: this.currentStudent.email,
-      timeSpentSeconds: this.totalTimeSpent,
-      answers: Object.keys(this.studentAnswers).map(qid => ({
-        questionId: qid,
-        selectedOptions: this.studentAnswers[qid]
-      }))
+    // Record Attempt
+    const attempt = {
+      id: 'att-' + Date.now(),
+      quizId: this.activeQuiz.id,
+      quizTitle: this.activeQuiz.title,
+      studentName: this.currentUser.name,
+      studentPhone: this.currentUser.phone,
+      score: score,
+      totalPoints: totalPoints,
+      percentage: percentage,
+      passed: passed,
+      passingScorePercent: passThreshold,
+      timestamp: Date.now()
     };
 
+    this.attempts.unshift(attempt);
+    this.saveAttemptsLocal();
+
+    // Update User Stats
+    const user = this.users.find(u => u.phone === this.currentUser.phone);
+    if (user) {
+      user.examsTaken = (user.examsTaken || 0) + 1;
+      if (passed) user.examsPassed = (user.examsPassed || 0) + 1;
+      this.saveUsersLocal();
+    }
+
+    // Sync Attempt to Backend if available
+    fetch(`/api/quizzes/${this.activeQuiz.id}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quizId: this.activeQuiz.id,
+        studentName: this.currentUser.name,
+        studentEmail: this.currentUser.phone,
+        timeSpentSeconds: ((this.activeQuiz.durationMinutes || 10) * 60) - this.secondsRemaining,
+        answers: Object.entries(this.studentAnswers).map(([qId, optIdx]) => ({
+          questionId: qId,
+          selectedOptions: [optIdx]
+        }))
+      })
+    }).catch(() => {});
+
+    // Notify Android App
+    if (window.AndroidApp && typeof window.AndroidApp.setExamActive === 'function') {
+      window.AndroidApp.setExamActive(false);
+    }
+
+    // Close Exam Runner View
+    document.getElementById('exam-runner-view').classList.remove('active');
+    this.activeQuiz = null;
+
+    // Show Scorecard Modal
+    this.showScorecard(attempt, evaluations);
+  }
+
+  showScorecard(attempt, evaluations) {
+    const modal = document.getElementById('scorecard-modal');
+    modal.classList.add('active');
+
+    document.getElementById('scorecard-exam-title').textContent = attempt.quizTitle;
+    document.getElementById('scorecard-candidate-name').textContent = `Candidate: ${attempt.studentName} (📞 ${attempt.studentPhone})`;
+    document.getElementById('scorecard-percentage').textContent = `${attempt.percentage}%`;
+    document.getElementById('scorecard-pass-mark').textContent = `${attempt.passingScorePercent}%`;
+    document.getElementById('scorecard-points').textContent = `${attempt.score} / ${attempt.totalPoints}`;
+
+    const passBadge = document.getElementById('scorecard-pass-badge');
+    const icon = document.getElementById('scorecard-icon');
+
+    if (attempt.passed) {
+      passBadge.className = 'badge badge-passed';
+      passBadge.textContent = 'EXAM PASSED ✅';
+      icon.textContent = '🎉';
+    } else {
+      passBadge.className = 'badge badge-failed';
+      passBadge.textContent = 'DID NOT PASS ❌';
+      icon.textContent = '⚠️';
+    }
+
+    const evalContainer = document.getElementById('scorecard-evaluations');
+    evalContainer.innerHTML = '';
+
+    evaluations.forEach((item, idx) => {
+      const card = document.createElement('div');
+      card.style.background = '#0b0f19';
+      card.style.border = `1px solid ${item.isCorrect ? 'var(--success)' : 'var(--danger)'}`;
+      card.style.borderRadius = '8px';
+      card.style.padding = '12px';
+
+      const yourOpt = item.userChoice !== undefined ? `${String.fromCharCode(65 + item.userChoice)}: ${item.options[item.userChoice]}` : 'Unanswered';
+      const corrOpt = `${String.fromCharCode(65 + item.correctChoice)}: ${item.options[item.correctChoice]}`;
+
+      card.innerHTML = `
+        <div style="font-weight:700; font-size:13px; color:white; margin-bottom:4px;">Q${idx + 1}: ${item.qText}</div>
+        <div style="font-size:12px; margin-bottom:2px; color:${item.isCorrect ? '#34d399' : '#f87171'};">
+          Your Answer: <strong>${yourOpt}</strong> ${item.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+        </div>
+        ${!item.isCorrect ? `<div style="font-size:12px; color:#34d399; margin-bottom:2px;">Designated Correct Answer: <strong>${corrOpt}</strong></div>` : ''}
+        ${item.explanation ? `<div style="font-size:11px; color:#94a3b8; margin-top:4px; font-style:italic;">💡 Explanation: ${item.explanation}</div>` : ''}
+      `;
+      evalContainer.appendChild(card);
+    });
+  }
+
+  closeScorecard() {
+    document.getElementById('scorecard-modal').classList.remove('active');
+    this.renderStudentView();
     try {
-      const res = await fetch(`${this.apiBase}/quizzes/${this.currentQuiz.id}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    } catch (e) {}
+  }
+
+  exitExam() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    document.getElementById('exam-runner-view').classList.remove('active');
+    this.activeQuiz = null;
+    this.renderStudentView();
+    try {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    } catch (e) {}
+  }
+
+  // --- ADMIN CONTROL CENTER ("Admin and Admin123 use login admin panel show user and exam show how many use pass") ---
+  renderAdminView() {
+    // 1. Calculate Pass/Fail Stats
+    const totalUsers = this.users.length;
+    const totalAttempts = this.attempts.length;
+    const passedAttempts = this.attempts.filter(a => a.passed).length;
+    const failedAttempts = totalAttempts - passedAttempts;
+    const passRate = totalAttempts > 0 ? Math.round((passedAttempts / totalAttempts) * 100) : 0;
+
+    document.getElementById('stat-total-users').textContent = totalUsers;
+    document.getElementById('stat-total-attempts').textContent = totalAttempts;
+    document.getElementById('stat-passed-users').textContent = `${passedAttempts} Passed`;
+    document.getElementById('stat-failed-users').textContent = `${failedAttempts} Failed`;
+    document.getElementById('stat-pass-rate').textContent = `${passRate}%`;
+
+    // 2. Render Attempts Table ("show how many use pass")
+    const attemptsTbody = document.getElementById('admin-attempts-tbody');
+    attemptsTbody.innerHTML = '';
+
+    if (this.attempts.length === 0) {
+      attemptsTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:#94a3b8;">No exam submissions recorded yet.</td></tr>`;
+    } else {
+      this.attempts.forEach(att => {
+        const tr = document.createElement('tr');
+        const badge = att.passed
+          ? `<span class="badge badge-passed">PASSED (${att.percentage}%) ✅</span>`
+          : `<span class="badge badge-failed">FAILED (${att.percentage}%) ❌</span>`;
+
+        tr.innerHTML = `
+          <td style="font-weight:700; color:white;">${att.studentName}</td>
+          <td style="color:#a5b4fc; font-family:monospace;">${att.studentPhone || 'N/A'}</td>
+          <td style="font-weight:600;">${att.quizTitle}</td>
+          <td style="font-weight:700;">${att.score} / ${att.totalPoints} pts</td>
+          <td>${att.passingScorePercent || 70}%</td>
+          <td>${badge}</td>
+          <td style="color:#94a3b8;">${new Date(att.timestamp).toLocaleString()}</td>
+        `;
+        attemptsTbody.appendChild(tr);
       });
+    }
 
-      if (!res.ok) throw new Error('Failed to evaluate quiz');
+    // 3. Render Registered Users Table ("show user")
+    const usersTbody = document.getElementById('admin-users-tbody');
+    usersTbody.innerHTML = '';
 
-      const result = await res.json();
-      this.lastResult = result;
-      this.renderResult(result);
-      this.showTab('result');
+    this.users.forEach(u => {
+      const tr = document.createElement('tr');
+      const passRatio = u.examsTaken > 0 ? `${u.examsPassed || 0} / ${u.examsTaken}` : '0';
+      const statusBadge = (u.examsPassed > 0)
+        ? `<span class="badge badge-passed">Passed Exam(s) ✅</span>`
+        : (u.examsTaken > 0 ? `<span class="badge badge-failed">Needs Retest ❌</span>` : `<span class="badge" style="background:#334155; color:#cbd5e1;">New Student</span>`);
 
-      if (result.passed) {
-        this.playSound('success');
-      } else {
-        this.playSound('fail');
-      }
+      tr.innerHTML = `
+        <td style="font-weight:700; color:white;">${u.name}</td>
+        <td style="color:#a5b4fc; font-family:monospace;">${u.phone}</td>
+        <td style="color:#94a3b8;">${new Date(u.registeredAt).toLocaleDateString()}</td>
+        <td style="font-weight:600;">${u.examsTaken || 0}</td>
+        <td style="font-weight:600; color:#34d399;">${u.examsPassed || 0}</td>
+        <td>${statusBadge}</td>
+      `;
+      usersTbody.appendChild(tr);
+    });
 
-      this.saveLocalHistory(result);
-    } catch (e) {
-      alert('Error submitting quiz: ' + e.message);
+    // 4. Populate Quiz Selector for Questions Studio
+    const quizSel = document.getElementById('admin-quiz-selector');
+    quizSel.innerHTML = '';
+    this.quizzes.forEach(q => {
+      const opt = document.createElement('option');
+      opt.value = q.id;
+      opt.textContent = `${q.title} (${q.questions.length} Questions)`;
+      quizSel.appendChild(opt);
+    });
+
+    this.renderAdminQuestions();
+  }
+
+  setAdminTab(tab) {
+    const usersBtn = document.getElementById('admin-tab-users-btn');
+    const questionsBtn = document.getElementById('admin-tab-questions-btn');
+    const usersContent = document.getElementById('admin-tab-users-content');
+    const questionsContent = document.getElementById('admin-tab-questions-content');
+
+    if (tab === 'users') {
+      usersBtn.classList.add('active');
+      questionsBtn.classList.remove('active');
+      usersContent.style.display = 'block';
+      questionsContent.style.display = 'none';
+    } else {
+      questionsBtn.classList.add('active');
+      usersBtn.classList.remove('active');
+      questionsContent.style.display = 'block';
+      usersContent.style.display = 'none';
+      this.renderAdminQuestions();
     }
   }
 
-  // --- RESULT VIEW & REVIEW ---
-  renderResult(res) {
-    const gradeCircle = document.getElementById('result-grade-circle');
-    gradeCircle.textContent = res.grade;
-    gradeCircle.className = `inline-flex items-center justify-center w-24 h-24 rounded-full border-4 text-4xl font-black mx-auto mb-2 ${res.passed ? 'grade-circle-pass' : 'grade-circle-fail'}`;
+  renderAdminQuestions() {
+    const quizId = document.getElementById('admin-quiz-selector').value;
+    const quiz = this.quizzes.find(q => q.id === quizId);
+    const container = document.getElementById('admin-questions-list');
+    container.innerHTML = '';
 
-    const titleEl = document.getElementById('result-status-title');
-    const subtitleEl = document.getElementById('result-status-subtitle');
-
-    if (res.passed) {
-      titleEl.textContent = 'Congratulations! You Passed!';
-      subtitleEl.textContent = `Excellent performance! You met the passing threshold of ${res.passingScorePercent}%.`;
-    } else {
-      titleEl.textContent = 'Assessment Incomplete / Not Passed';
-      subtitleEl.textContent = `You scored ${res.percentage}%. The passing threshold is ${res.passingScorePercent}%. Keep studying and try again!`;
+    if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8; background:var(--card-dark); border-radius:12px;">No questions in this exam yet. Click "Add New Question" to create one!</div>`;
+      return;
     }
 
-    document.getElementById('result-score-text').textContent = `${res.score} / ${res.totalPoints}`;
-    document.getElementById('result-percent-text').textContent = `${res.percentage}%`;
-    document.getElementById('result-time-text').textContent = `${Math.floor(res.timeSpentSeconds / 60)}m ${res.timeSpentSeconds % 60}s`;
-    document.getElementById('result-accuracy-text').textContent = `${res.correctCount} / ${res.totalQuestions}`;
+    quiz.questions.forEach((q, qIdx) => {
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      card.style.marginBottom = '16px';
+      card.style.padding = '20px';
 
-    // Render detailed review list
-    const reviewList = document.getElementById('result-review-list');
-    reviewList.innerHTML = (res.evaluations || []).map((ev, idx) => {
-      const statusBadge = ev.skipped ?
-        '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Skipped</span>' :
-        (ev.correct ?
-          '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Correct (+ ' + ev.pointsEarned + ' pts)</span>' :
-          '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">Incorrect (0 pts)</span>');
+      const correctIndex = (q.correctAnswers && q.correctAnswers.length > 0) ? q.correctAnswers[0] : 0;
 
-      const optionsHtml = (ev.options || []).map((opt, optIdx) => {
-        const isSelected = (ev.selectedOptions || []).includes(optIdx);
-        const isCorrectChoice = (ev.correctAnswers || []).includes(optIdx);
-
-        let borderClass = 'border-slate-700 bg-slate-900/60 text-slate-300';
-        let indicator = '';
-
-        if (isCorrectChoice) {
-          borderClass = 'border-emerald-500/80 bg-emerald-950/40 text-emerald-200';
-          indicator = '<span class="text-xs font-bold text-emerald-400">✓ Correct Answer</span>';
-        } else if (isSelected && !isCorrectChoice) {
-          borderClass = 'border-rose-500/80 bg-rose-950/40 text-rose-200';
-          indicator = '<span class="text-xs font-bold text-rose-400">✗ Your Choice</span>';
-        }
-
-        return `
-          <div class="flex items-center justify-between p-3 rounded-xl border text-sm ${borderClass}">
-            <span>${opt}</span>
-            ${indicator}
+      let optionsHtml = '';
+      q.options.forEach((optText, optIdx) => {
+        const isRight = (optIdx === correctIndex);
+        optionsHtml += `
+          <div onclick="app.setRightAnswer('${quiz.id}', '${q.id}', ${optIdx})"
+               style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; margin-bottom:8px; border-radius:8px; cursor:pointer; transition:all 0.2s;
+                      background: ${isRight ? 'rgba(16, 185, 129, 0.15)' : '#0b0f19'};
+                      border: 1.5px solid ${isRight ? 'var(--success)' : '#1e293b'};
+                      box-shadow: ${isRight ? '0 0 12px rgba(16, 185, 129, 0.2)' : 'none'};">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-weight:700; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+                           background:${isRight ? 'var(--success)' : '#1e293b'}; color:${isRight ? 'white' : '#94a3b8'}; font-size:11px;">
+                ${String.fromCharCode(65 + optIdx)}
+              </span>
+              <span style="font-size:14px; color:${isRight ? '#34d399' : '#cbd5e1'}; font-weight:${isRight ? '700' : '400'};">
+                ${optText}
+              </span>
+            </div>
+            <div>
+              ${isRight
+                ? `<span class="badge badge-passed">✓ RIGHT ANSWER</span>`
+                : `<span style="font-size:11px; color:#64748b;">Click to set as right</span>`}
+            </div>
           </div>
         `;
-      }).join('');
+      });
 
-      return `
-        <div class="bg-slate-800/80 rounded-2xl border border-slate-700 p-6 space-y-4 shadow-lg">
-          <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Question ${idx + 1}</span>
-            ${statusBadge}
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+          <div>
+            <span style="font-size:12px; font-weight:700; color:var(--primary);">Question ${qIdx + 1} (${q.points || 10} Points)</span>
+            <h4 style="font-size:16px; font-weight:700; color:white; margin-top:4px;">${q.text}</h4>
           </div>
-          <h4 class="text-base font-bold text-white leading-relaxed">${ev.questionText}</h4>
-          <div class="space-y-2 pt-1">${optionsHtml}</div>
-          ${ev.explanation ? `
-            <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs text-slate-300 space-y-1">
-              <span class="font-bold text-indigo-300 uppercase tracking-wider text-[10px] block">Educational Explanation</span>
-              <p class="leading-relaxed">${ev.explanation}</p>
-            </div>
-          ` : ''}
+          <div style="display:flex; gap:8px;">
+            <button onclick="app.editQuestion('${quiz.id}', '${q.id}')" class="btn btn-outline btn-sm">Edit</button>
+            <button onclick="app.deleteQuestion('${quiz.id}', '${q.id}')" class="btn btn-danger btn-sm">Delete</button>
+          </div>
         </div>
+
+        <div style="margin-top:12px;">
+          ${optionsHtml}
+        </div>
+
+        ${q.explanation ? `<div style="font-size:12px; color:#94a3b8; margin-top:8px; font-style:italic;">💡 <strong>Teacher Explanation:</strong> ${q.explanation}</div>` : ''}
       `;
-    }).join('');
-  }
-
-  retakeCurrentQuiz() {
-    if (this.currentQuiz) {
-      this.promptStudentInfo(this.currentQuiz.id);
-    }
-  }
-
-  // --- CERTIFICATE GENERATOR ---
-  openCertificateModal() {
-    if (!this.lastResult) return;
-    const res = this.lastResult;
-
-    document.getElementById('cert-student-name').textContent = res.studentName || 'Student';
-    document.getElementById('cert-quiz-title').textContent = res.quizTitle;
-    document.getElementById('cert-score-percent').textContent = `${res.percentage}%`;
-    document.getElementById('cert-date').textContent = new Date(res.completedAt).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric'
+      container.appendChild(card);
     });
-    document.getElementById('cert-hash').textContent = `QP-${(res.attemptId || 'CERT').toUpperCase()}`;
-
-    document.getElementById('modal-certificate').classList.remove('hidden');
   }
 
-  closeCertificateModal() {
-    document.getElementById('modal-certificate').classList.add('hidden');
+  // --- 1-CLICK RIGHT ANSWER TOGGLE ---
+  setRightAnswer(quizId, questionId, optionIndex) {
+    const quiz = this.quizzes.find(q => q.id === quizId);
+    if (!quiz) return;
+    const question = quiz.questions.find(q => q.id === questionId);
+    if (!question) return;
+
+    question.correctAnswers = [optionIndex];
+    this.saveQuizzesLocal();
+
+    // Sync to backend if online
+    fetch(`/api/quizzes/${quizId}/questions/${questionId}/right-answer`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rightAnswerIndex: optionIndex })
+    }).catch(() => {});
+
+    this.showToast(`✅ Right answer updated to Option ${String.fromCharCode(65 + optionIndex)}!`);
+    this.renderAdminQuestions();
   }
 
-  // --- LEADERBOARD ---
-  async loadLeaderboard() {
-    const filter = document.getElementById('leaderboard-quiz-filter').value;
-    try {
-      const res = await fetch(`${this.apiBase}/leaderboard?quizId=${filter}&limit=25`);
-      if (res.ok) {
-        const list = await res.json();
-        const tbody = document.getElementById('leaderboard-table-body');
-        const emptyNotice = document.getElementById('leaderboard-empty');
+  // --- ADD / EDIT QUESTION MODAL ---
+  showAddQuestionModal() {
+    this.editingQuestionQuizId = null;
+    this.editingQuestionId = null;
+    document.getElementById('modal-q-heading').textContent = 'Add New Question';
+    document.getElementById('q-edit-text').value = '';
+    document.getElementById('q-edit-points').value = 10;
+    document.getElementById('q-edit-explanation').value = '';
 
-        if (!list || list.length === 0) {
-          tbody.innerHTML = '';
-          emptyNotice.classList.remove('hidden');
-          return;
-        }
-
-        emptyNotice.classList.add('hidden');
-        tbody.innerHTML = list.map((item, idx) => {
-          let rankBadge = `<span class="font-mono font-bold text-slate-400">#${idx + 1}</span>`;
-          if (idx === 0) rankBadge = `<span class="text-xl">🥇</span>`;
-          if (idx === 1) rankBadge = `<span class="text-xl">🥈</span>`;
-          if (idx === 2) rankBadge = `<span class="text-xl">🥉</span>`;
-
-          const timeFormatted = `${Math.floor(item.timeSpentSeconds / 60)}m ${item.timeSpentSeconds % 60}s`;
-          const dateFormatted = new Date(item.timestamp).toLocaleDateString();
-
-          return `
-            <tr class="hover:bg-slate-800/40 transition">
-              <td class="px-6 py-4">${rankBadge}</td>
-              <td class="px-6 py-4 font-bold text-white">${item.studentName}</td>
-              <td class="px-6 py-4 text-slate-300">${item.quizTitle}</td>
-              <td class="px-6 py-4 text-emerald-400 font-extrabold">${item.percentage}%</td>
-              <td class="px-6 py-4"><span class="px-2 py-0.5 rounded text-xs font-bold bg-indigo-500/20 text-indigo-300">${item.grade}</span></td>
-              <td class="px-6 py-4 text-slate-400 font-mono text-xs">${timeFormatted}</td>
-              <td class="px-6 py-4 text-slate-400 text-xs">${dateFormatted}</td>
-            </tr>
-          `;
-        }).join('');
-      }
-    } catch (e) {
-      console.error('Failed to load leaderboard:', e);
-    }
-  }
-
-  // --- HISTORY ---
-  saveLocalHistory(result) {
-    try {
-      const stored = JSON.parse(localStorage.getItem('quiz_history') || '[]');
-      stored.unshift({
-        quizTitle: result.quizTitle,
-        studentName: result.studentName,
-        percentage: result.percentage,
-        grade: result.grade,
-        passed: result.passed,
-        timestamp: Date.now()
-      });
-      localStorage.setItem('quiz_history', JSON.stringify(stored.slice(0, 50)));
-    } catch (e) {}
-  }
-
-  loadHistory() {
-    const tbody = document.getElementById('history-table-body');
-    const emptyNotice = document.getElementById('history-empty');
-
-    let history = [];
-    try {
-      history = JSON.parse(localStorage.getItem('quiz_history') || '[]');
-    } catch (e) {}
-
-    if (history.length === 0) {
-      tbody.innerHTML = '';
-      emptyNotice.classList.remove('hidden');
-      return;
-    }
-
-    emptyNotice.classList.add('hidden');
-    tbody.innerHTML = history.map(item => `
-      <tr class="hover:bg-slate-800/40 transition">
-        <td class="px-6 py-4 text-xs text-slate-400">${new Date(item.timestamp).toLocaleString()}</td>
-        <td class="px-6 py-4 font-bold text-white">${item.quizTitle}</td>
-        <td class="px-6 py-4 text-slate-300">${item.studentName}</td>
-        <td class="px-6 py-4 font-bold text-indigo-400">${item.grade}</td>
-        <td class="px-6 py-4 font-extrabold text-emerald-400">${item.percentage}%</td>
-        <td class="px-6 py-4">
-          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${item.passed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">
-            ${item.passed ? 'Passed' : 'Failed'}
-          </span>
-        </td>
-      </tr>
-    `).join('');
-  }
-
-  // --- ADMIN PORTAL ---
-  async loadAdminQuizzes() {
-    try {
-      const res = await fetch(`${this.apiBase}/quizzes/admin/all`);
-      if (res.ok) {
-        const list = await res.json();
-        const tbody = document.getElementById('admin-quizzes-table-body');
-        tbody.innerHTML = list.map(q => `
-          <tr class="hover:bg-slate-800/40 transition">
-            <td class="px-6 py-4 font-bold text-white">${q.title}</td>
-            <td class="px-6 py-4 text-slate-300"><span class="px-2 py-0.5 rounded text-xs bg-slate-800 border border-slate-700">${q.category}</span></td>
-            <td class="px-6 py-4 text-slate-300 text-xs">${q.difficulty}</td>
-            <td class="px-6 py-4 font-mono text-xs">${q.totalQuestions || (q.questions ? q.questions.length : 0)}</td>
-            <td class="px-6 py-4 text-xs">${q.durationMinutes} min</td>
-            <td class="px-6 py-4 text-xs font-bold text-amber-400">${q.passingScorePercent}%</td>
-            <td class="px-6 py-4 text-right space-x-2">
-              <button onclick="app.editQuiz('${q.id}')" class="px-3 py-1 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded-lg text-xs font-semibold transition">Edit</button>
-              <button onclick="app.deleteQuiz('${q.id}')" class="px-3 py-1 bg-rose-600/30 hover:bg-rose-600 text-rose-300 hover:text-white rounded-lg text-xs font-semibold transition">Delete</button>
-            </td>
-          </tr>
-        `).join('');
-      }
-    } catch (e) {
-      console.error('Failed to load admin quizzes:', e);
-    }
-  }
-
-  openQuizEditorModal(quiz = null) {
-    document.getElementById('editor-quiz-id').value = quiz ? quiz.id : '';
-    document.getElementById('editor-title').value = quiz ? quiz.title : '';
-    document.getElementById('editor-description').value = quiz ? quiz.description : '';
-    document.getElementById('editor-category').value = quiz ? quiz.category : '';
-    document.getElementById('editor-difficulty').value = quiz ? quiz.difficulty : 'Intermediate';
-    document.getElementById('editor-duration').value = quiz ? quiz.durationMinutes : 10;
-    document.getElementById('editor-passing').value = quiz ? quiz.passingScorePercent : 60;
-
-    this.editorQuestions = quiz && quiz.questions ? JSON.parse(JSON.stringify(quiz.questions)) : [];
-    if (this.editorQuestions.length === 0) {
-      this.addEditorQuestion();
-    } else {
-      this.renderEditorQuestions();
-    }
-
-    document.getElementById('quiz-editor-modal-title').textContent = quiz ? 'Edit Assessment' : 'Create New Assessment';
-    document.getElementById('modal-quiz-editor').classList.remove('hidden');
-  }
-
-  closeQuizEditorModal() {
-    document.getElementById('modal-quiz-editor').classList.add('hidden');
-  }
-
-  async editQuiz(id) {
-    try {
-      const res = await fetch(`${this.apiBase}/quizzes/${id}/admin`);
-      if (res.ok) {
-        const quiz = await res.json();
-        this.openQuizEditorModal(quiz);
-      }
-    } catch (e) {
-      alert('Error fetching quiz: ' + e.message);
-    }
-  }
-
-  async deleteQuiz(id) {
-    if (!confirm('Are you sure you want to permanently delete this quiz?')) return;
-    try {
-      const res = await fetch(`${this.apiBase}/quizzes/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        this.showToast('Quiz deleted successfully', '🗑️');
-        await this.loadAdminQuizzes();
-        await this.loadQuizzes();
-        await this.loadAnalytics();
-      }
-    } catch (e) {
-      alert('Error deleting quiz: ' + e.message);
-    }
-  }
-
-  addEditorQuestion() {
-    this.editorQuestions.push({
-      id: 'q-' + Math.random().toString(36).substr(2, 8),
-      text: '',
-      type: 'SINGLE_CHOICE',
-      options: ['Option A', 'Option B', 'Option C', 'Option D'],
-      correctAnswers: [0],
-      explanation: '',
-      points: 1
+    // Populate target quiz dropdown
+    const sel = document.getElementById('q-edit-target-quiz');
+    sel.innerHTML = '';
+    this.quizzes.forEach(q => {
+      const opt = document.createElement('option');
+      opt.value = q.id;
+      opt.textContent = q.title;
+      sel.appendChild(opt);
     });
-    this.renderEditorQuestions();
-  }
 
-  removeEditorQuestion(index) {
-    this.editorQuestions.splice(index, 1);
-    this.renderEditorQuestions();
-  }
-
-  renderEditorQuestions() {
-    const container = document.getElementById('editor-questions-container');
-    document.getElementById('editor-question-count-badge').textContent = `${this.editorQuestions.length} questions`;
-
-    container.innerHTML = this.editorQuestions.map((q, idx) => `
-      <div class="bg-slate-900/90 rounded-2xl border border-slate-700/80 p-5 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Question ${idx + 1}</span>
-          <button type="button" onclick="app.removeEditorQuestion(${idx})" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">✕ Remove</button>
-        </div>
-
-        <div>
-          <label class="block text-xs text-slate-400 uppercase font-semibold mb-1">Question Prompt *</label>
-          <input type="text" value="${q.text || ''}" onchange="app.editorQuestions[${idx}].text = this.value" placeholder="e.g. What is the output of..." class="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs text-slate-400 uppercase font-semibold mb-1">Question Type</label>
-            <select onchange="app.changeEditorQuestionType(${idx}, this.value)" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200">
-              <option value="SINGLE_CHOICE" ${q.type === 'SINGLE_CHOICE' ? 'selected' : ''}>Single Choice (Radio)</option>
-              <option value="MULTIPLE_CHOICE" ${q.type === 'MULTIPLE_CHOICE' ? 'selected' : ''}>Multiple Choice (Checkboxes)</option>
-              <option value="TRUE_FALSE" ${q.type === 'TRUE_FALSE' ? 'selected' : ''}>True / False</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs text-slate-400 uppercase font-semibold mb-1">Point Value</label>
-            <input type="number" min="1" max="10" value="${q.points || 1}" onchange="app.editorQuestions[${idx}].points = parseInt(this.value) || 1" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100">
-          </div>
-        </div>
-
-        <!-- Options builder -->
-        <div class="space-y-2 pt-2">
-          <label class="block text-xs text-slate-400 uppercase font-semibold">Options & Mark Correct (Check to set as correct answer)</label>
-          ${(q.options || []).map((opt, optIdx) => {
-            const isCorrect = (q.correctAnswers || []).includes(optIdx);
-            return `
-              <div class="flex items-center gap-2">
-                <input type="checkbox" ${isCorrect ? 'checked' : ''} onchange="app.toggleEditorCorrectAnswer(${idx}, ${optIdx})" class="w-4 h-4 rounded text-indigo-600">
-                <input type="text" value="${opt}" onchange="app.editorQuestions[${idx}].options[${optIdx}] = this.value" class="flex-1 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
-              </div>
-            `;
-          }).join('')}
-        </div>
-
-        <div>
-          <label class="block text-xs text-slate-400 uppercase font-semibold mb-1">Explanation</label>
-          <textarea rows="2" placeholder="Why this answer is correct..." onchange="app.editorQuestions[${idx}].explanation = this.value" class="w-full px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200">${q.explanation || ''}</textarea>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  changeEditorQuestionType(idx, newType) {
-    const q = this.editorQuestions[idx];
-    q.type = newType;
-    if (newType === 'TRUE_FALSE') {
-      q.options = ['True', 'False'];
-      q.correctAnswers = [0];
-    } else if (q.options.length < 2) {
-      q.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+    // Populate 4 blank option rows with first selected as right answer
+    const container = document.getElementById('modal-options-builder');
+    container.innerHTML = '';
+    for (let i = 0; i < 4; i++) {
+      this.createOptionRow(container, i, '', i === 0);
     }
-    this.renderEditorQuestions();
+
+    document.getElementById('question-modal').classList.add('active');
   }
 
-  toggleEditorCorrectAnswer(qIdx, optIdx) {
-    const q = this.editorQuestions[qIdx];
-    if (q.type === 'SINGLE_CHOICE' || q.type === 'TRUE_FALSE') {
-      q.correctAnswers = [optIdx];
+  editQuestion(quizId, questionId) {
+    const quiz = this.quizzes.find(q => q.id === quizId);
+    if (!quiz) return;
+    const q = quiz.questions.find(item => item.id === questionId);
+    if (!q) return;
+
+    this.editingQuestionQuizId = quizId;
+    this.editingQuestionId = questionId;
+
+    document.getElementById('modal-q-heading').textContent = 'Edit Question';
+    document.getElementById('q-edit-text').value = q.text;
+    document.getElementById('q-edit-points').value = q.points || 10;
+    document.getElementById('q-edit-explanation').value = q.explanation || '';
+
+    const sel = document.getElementById('q-edit-target-quiz');
+    sel.innerHTML = '';
+    const opt = document.createElement('option');
+    opt.value = quiz.id;
+    opt.textContent = quiz.title;
+    sel.appendChild(opt);
+
+    const container = document.getElementById('modal-options-builder');
+    container.innerHTML = '';
+    const correctIdx = (q.correctAnswers && q.correctAnswers.length > 0) ? q.correctAnswers[0] : 0;
+
+    q.options.forEach((optText, idx) => {
+      this.createOptionRow(container, idx, optText, idx === correctIdx);
+    });
+
+    document.getElementById('question-modal').classList.add('active');
+  }
+
+  createOptionRow(container, idx, value, isChecked) {
+    const row = document.createElement('div');
+    row.className = 'modal-option-row';
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.gap = '10px';
+
+    row.innerHTML = `
+      <input type="radio" name="modal-right-opt" value="${idx}" ${isChecked ? 'checked' : ''} title="Mark as Right Answer" style="width:18px; height:18px; accent-color:var(--success);">
+      <input type="text" class="form-control modal-opt-input" placeholder="Option ${String.fromCharCode(65 + idx)} text" value="${value.replace(/"/g, '&quot;')}" required>
+      <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm" style="padding:6px 10px;" title="Remove option">✕</button>
+    `;
+    container.appendChild(row);
+  }
+
+  addOptionRow() {
+    const container = document.getElementById('modal-options-builder');
+    const nextIdx = container.children.length;
+    this.createOptionRow(container, nextIdx, '', false);
+  }
+
+  closeQuestionModal() {
+    document.getElementById('question-modal').classList.remove('active');
+  }
+
+  saveQuestion(e) {
+    e.preventDefault();
+    const text = document.getElementById('q-edit-text').value.trim();
+    const points = parseInt(document.getElementById('q-edit-points').value, 10) || 10;
+    const explanation = document.getElementById('q-edit-explanation').value.trim();
+    const targetQuizId = document.getElementById('q-edit-target-quiz').value;
+
+    const optInputs = document.querySelectorAll('.modal-opt-input');
+    const options = Array.from(optInputs).map(inp => inp.value.trim()).filter(v => v.length > 0);
+
+    if (options.length < 2) {
+      alert('Please provide at least 2 options.');
+      return;
+    }
+
+    const checkedRadio = document.querySelector('input[name="modal-right-opt"]:checked');
+    const correctIndex = checkedRadio ? parseInt(checkedRadio.value, 10) : 0;
+
+    const quiz = this.quizzes.find(q => q.id === targetQuizId);
+    if (!quiz) return;
+
+    if (this.editingQuestionId) {
+      // Update existing
+      const q = quiz.questions.find(item => item.id === this.editingQuestionId);
+      if (q) {
+        q.text = text;
+        q.points = points;
+        q.options = options;
+        q.correctAnswers = [correctIndex < options.length ? correctIndex : 0];
+        q.explanation = explanation;
+      }
+      this.showToast('Question updated successfully!');
     } else {
-      if (q.correctAnswers.includes(optIdx)) {
-        q.correctAnswers = q.correctAnswers.filter(i => i !== optIdx);
-      } else {
-        q.correctAnswers.push(optIdx);
-      }
+      // Add new
+      const newQ = {
+        id: 'q-' + Date.now(),
+        text: text,
+        type: 'SINGLE_CHOICE',
+        points: points,
+        options: options,
+        correctAnswers: [correctIndex < options.length ? correctIndex : 0],
+        explanation: explanation
+      };
+      quiz.questions.push(newQ);
+      this.showToast('New question created!');
     }
-    this.renderEditorQuestions();
+
+    this.saveQuizzesLocal();
+    this.closeQuestionModal();
+    this.renderAdminQuestions();
   }
 
-  async saveQuizFromEditor() {
-    const title = document.getElementById('editor-title').value.trim();
-    const category = document.getElementById('editor-category').value.trim();
-    const description = document.getElementById('editor-description').value.trim();
-    const difficulty = document.getElementById('editor-difficulty').value;
-    const duration = parseInt(document.getElementById('editor-duration').value) || 10;
-    const passing = parseInt(document.getElementById('editor-passing').value) || 60;
-    const quizId = document.getElementById('editor-quiz-id').value;
-
-    if (!title || !category) {
-      alert('Quiz Title and Category are required!');
-      return;
-    }
-
-    if (this.editorQuestions.length === 0) {
-      alert('Please add at least one question to the quiz.');
-      return;
-    }
-
-    const payload = {
-      id: quizId || null,
-      title,
-      description,
-      category,
-      difficulty,
-      durationMinutes: duration,
-      passingScorePercent: passing,
-      questions: this.editorQuestions,
-      active: true
-    };
-
-    try {
-      const url = quizId ? `${this.apiBase}/quizzes/${quizId}` : `${this.apiBase}/quizzes`;
-      const method = quizId ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error('Failed to save quiz');
-
-      this.showToast('Quiz published successfully!', '🚀');
-      this.closeQuizEditorModal();
-      await this.loadAdminQuizzes();
-      await this.loadQuizzes();
-      await this.loadAnalytics();
-    } catch (e) {
-      alert('Error saving quiz: ' + e.message);
-    }
+  deleteQuestion(quizId, questionId) {
+    if (!confirm('Are you sure you want to delete this question?')) return;
+    const quiz = this.quizzes.find(q => q.id === quizId);
+    if (!quiz) return;
+    quiz.questions = quiz.questions.filter(q => q.id !== questionId);
+    this.saveQuizzesLocal();
+    this.showToast('Question removed.');
+    this.renderAdminQuestions();
   }
 
-  async resetSeedDataPrompt() {
-    if (!confirm('This will restore all default quizzes. Are you sure?')) return;
-    try {
-      const res = await fetch(`${this.apiBase}/quizzes/admin/reset`, { method: 'POST' });
-      if (res.ok) {
-        this.showToast('Default sample quizzes restored!', '↺');
-        await this.loadAdminQuizzes();
-        await this.loadQuizzes();
-        await this.loadAnalytics();
-      }
-    } catch (e) {
-      alert('Error resetting seed: ' + e.message);
-    }
+  previewStudentView() {
+    this.showView('student-view');
+    this.renderStudentView();
+    this.showToast('Viewing Student Portal');
   }
 
-  // --- TOAST SYSTEM ---
-  showToast(msg, icon = 'ℹ️') {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-message').textContent = msg;
-    document.getElementById('toast-icon').textContent = icon;
+  // --- UI TOAST HELPER ---
+  showToast(msg) {
+    if (window.AndroidApp && typeof window.AndroidApp.showToast === 'function') {
+      window.AndroidApp.showToast(msg);
+    }
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.bottom = '24px';
+    toast.style.right = '24px';
+    toast.style.background = '#1e293b';
+    toast.style.color = '#f8fafc';
+    toast.style.border = '1px solid var(--primary)';
+    toast.style.padding = '12px 20px';
+    toast.style.borderRadius = '10px';
+    toast.style.fontSize = '14px';
+    toast.style.fontWeight = '600';
+    toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+    toast.style.zIndex = '99999';
+    toast.style.transition = 'all 0.3s ease';
+    toast.textContent = msg;
 
-    toast.classList.remove('translate-y-20', 'opacity-0');
+    document.body.appendChild(toast);
     setTimeout(() => {
-      toast.classList.add('translate-y-20', 'opacity-0');
-    }, 3500);
-  }
-
-  bindEvents() {
-    // Keyboard navigation during active quiz
-    window.addEventListener('keydown', (e) => {
-      const runnerView = document.getElementById('view-runner');
-      if (runnerView && !runnerView.classList.contains('hidden')) {
-        if (e.key === 'ArrowRight') {
-          this.nextQuestion();
-        } else if (e.key === 'ArrowLeft') {
-          this.prevQuestion();
-        } else if (['1', '2', '3', '4', '5'].includes(e.key)) {
-          const idx = parseInt(e.key) - 1;
-          const q = this.currentQuiz.questions[this.currentQuestionIndex];
-          if (q && q.options && idx < q.options.length) {
-            this.selectOption(idx);
-          }
-        }
-      }
-    });
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(() => toast.remove(), 300);
+    }, 2800);
   }
 }
 
-// Initialize Application on Window Load
-window.app = new QuizApp();
+// Global App Instance
+const app = new AppManager();

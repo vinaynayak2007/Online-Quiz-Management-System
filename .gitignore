@@ -81,3 +81,5 @@ node_modules/
 package.json
 package-lock.json
 .sudo_as_admin_successful
+.config/
+.local/

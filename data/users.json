@@ -1,0 +1,10 @@
+[ {
+  "id" : "usr-demo-1",
+  "name" : "Vinay Nayak",
+  "phone" : "9876543210",
+  "password" : "student123",
+  "role" : "STUDENT",
+  "registeredAt" : 1793209360419,
+  "examsTaken" : 1,
+  "examsPassed" : 1
+} ]
