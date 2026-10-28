@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <!-- Logo -->
+        <TextView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@color/primary"
+            android:text="Q"
+            android:textColor="#ffffff"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quiz Examination Portal"
+            android:textColor="#ffffff"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pure Native Android Assessment App"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Segmented Tab Toggle: Sign In vs Register -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/card_dark"
+            android:padding="4dp"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:id="@+id/btn_tab_login"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="🔑 Sign In"
+                android:textColor="#ffffff"
+                android:background="@color/primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_tab_register"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="📝 Student Register"
+                android:textColor="@color/text_muted"
+                android:background="@color/card_dark"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Sign In Layout -->
+        <LinearLayout
+            android:id="@+id/layout_signin_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/card_dark"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phone Number or Username"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/et_login_id"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/bg_dark"
+                android:hint="Phone or 'Admin'"
+                android:textColorHint="#556677"
+                android:textColor="#ffffff"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:singleLine="true"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Password"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/et_login_password"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/bg_dark"
+                android:hint="Password ('Admin123' for Admin)"
+                android:textColorHint="#556677"
+                android:textColor="#ffffff"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:inputType="textPassword"
+                android:layout_marginBottom="20dp" />
+
+            <Button
+                android:id="@+id/btn_submit_login"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/primary"
+                android:text="Sign In to Portal"
+                android:textColor="#ffffff"
+                android:textStyle="bold"
+                android:layout_marginBottom="14dp" />
+
+            <!-- Quick Fills -->
+            <Button
+                android:id="@+id/btn_fill_admin"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:background="@color/bg_dark"
+                android:text="🛡️ Quick-Fill Admin (Admin / Admin123)"
+                android:textColor="#a5b4fc"
+                android:textSize="12sp"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btn_fill_student"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:background="@color/bg_dark"
+                android:text="👤 Quick-Fill Student (9876543210 / student123)"
+                android:textColor="#34d399"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Register Layout -->
+        <LinearLayout
+            android:id="@+id/layout_register_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/card_dark"
+            android:padding="20dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Full Name"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/et_reg_name"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/bg_dark"
+                android:hint="e.g. Vinay Nayak"
+                android:textColorHint="#556677"
+                android:textColor="#ffffff"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:singleLine="true"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phone Number (10 digits)"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/et_reg_phone"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/bg_dark"
+                android:hint="e.g. 9876543210"
+                android:textColorHint="#556677"
+                android:textColor="#ffffff"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:inputType="phone"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create Password"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/et_reg_password"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/bg_dark"
+                android:hint="Password (min 4 characters)"
+                android:textColorHint="#556677"
+                android:textColor="#ffffff"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:inputType="textPassword"
+                android:layout_marginBottom="20dp" />
+
+            <Button
+                android:id="@+id/btn_submit_register"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/success"
+                android:text="Complete Registration &amp; Login"
+                android:textColor="#ffffff"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

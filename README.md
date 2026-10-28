@@ -1,12 +1,75 @@
-# 🚀 Online Quiz Management System (Java + Firebase + Android APK)
+# 📱 Online Quiz Management System - Native Android App (Java)
 
+[![Android](https://img.shields.io/badge/Android-APK%20Release-3DDC84.svg?logo=android&logoColor=white)](OnlineQuizSystem.apk)
 [![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Android](https://img.shields.io/badge/Android-APK%20Available-3DDC84.svg?logo=android&logoColor=white)](OnlineQuizSystem.apk)
-[![Firebase](https://img.shields.io/badge/Firebase-Admin%20SDK-yellow.svg)](https://firebase.google.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An enterprise-grade, full-stack **Online Quiz & Exam Management System** built with **Java 21**, **Spring Boot 3**, **Google Firebase Firestore**, and a **Native Android Application (`.apk`)** for mobile exams. Featuring real-time timed assessments, instant scoring and grade calculation, educational explanations, admin question bank management, leaderboards, printable certificates of achievement, and offline mobile exam capability.
+An enterprise-grade, **100% Pure Native Android Application (`.apk`)** for mobile examinations and assessments, developed in Java with zero HTML web dependencies. Featuring a secure initial authentication gateway, fullscreen anti-cheat exam runner with countdown timers, student exam catalogs, instant scoring & detailed question reviews, an in-app administrator control studio with live user pass/fail records, and full implementation of **Course Outcomes CO-1 through CO-4**.
+
+---
+
+## 📲 Download the Native Android App (`.apk`)
+
+| Resource | Link / Access | Description |
+| :--- | :--- | :--- |
+| 📱 **Direct APK Download** | [📥 **Download OnlineQuizSystem.apk**](OnlineQuizSystem.apk) | Standalone release-signed Android APK ready to install |
+| 🏷️ **GitHub Latest Release** | [🔗 **GitHub Releases (v1.0.2)**](https://github.com/vinaynayak2007/Online-Quiz-Management-System/releases/tag/v1.0.2) | Official release page with release notes & binaries |
+| 🌐 **GitHub Repository** | [🌐 **vinaynayak2007/Online-Quiz-Management-System**](https://github.com/vinaynayak2007/Online-Quiz-Management-System) | Full source tree and native Android client |
+| 🎓 **Course Outcomes Report** | [📄 **COURSE_OUTCOMES_REPORT.md**](COURSE_OUTCOMES_REPORT.md) | Academic technical report detailing CO-1, CO-2, CO-3, and CO-4 |
+
+---
+
+## 🌟 Native Android Application Architecture (Zero HTML / Pure Android)
+
+### 1. 🔒 Authentication Gateway (`LoginActivity`)
+- **Initial View**: Clean, dark-themed login & registration screen. Neither the student exam panel nor the admin studio is visible prior to authentication.
+- **Segmented Tabs**:
+  - **🔑 Sign In Tab**: Input Phone Number (or Username) and Password.
+  - **📝 Student Registration Tab**: Input **Full Name** + **Phone Number** (10 digits) + **Password**.
+- **Quick-Fill Buttons**:
+  - `🛡️ Quick-Fill Admin`: Pre-fills `Admin` & `Admin123`.
+  - `👤 Quick-Fill Student`: Pre-fills demo candidate credentials (`9876543210` / `student123`).
+
+### 2. 🎓 Student Examination Arena (`ExamListActivity`)
+- Shows personalized welcome header: `"Welcome, Candidate (📞 Phone)"`.
+- Displays available **Examination Tracks**:
+  1. **Java 21 & Object-Oriented Programming** (10 Mins | 4 Questions | Passing Score: 70%)
+  2. **Data Structures & Algorithms** (15 Mins | 4 Questions | Passing Score: 60%)
+  3. **Google Firebase & Cloud Architecture** (12 Mins | 4 Questions | Passing Score: 75%)
+  4. **Modern Full-Stack Web Development** (10 Mins | 4 Questions | Passing Score: 65%)
+- Displays candidate's previous attempt scores and **PASSED ✅** or **FAILED ❌** badges directly on each card.
+- Single-tap **"🚀 Start Exam (Full Screen Mode)"** button.
+
+### 3. 🖥️ Strict Fullscreen Anti-Cheat Exam Runner (`ExamActivity`)
+- **Immersive Fullscreen Kiosk Mode**: Activates `SYSTEM_UI_FLAG_IMMERSIVE_STICKY`, hiding notification bar and soft navigation keys.
+- **Screen Awake Lock**: Keeps device screen awake throughout the exam (`FLAG_KEEP_SCREEN_ON`).
+- **Anti-Cheat & Tab Switch Interceptor**:
+  - `onPause()` detects when candidate leaves the exam to switch apps or pull down notification panels.
+  - Triggers an urgent violation dialog: `"⚠️ EXAM INTEGRITY VIOLATION: Leaving the exam or switching apps is monitored! Violation Count: #X."`
+- **Native Live Timer**: Real-time ticking `CountDownTimer` with color transition (turns urgent red during final 60 seconds) and auto-submission on timeout.
+- **Back Button Protection**: Intercepts hardware back button with a confirmation dialog to prevent accidental session termination.
+
+### 4. 📊 Instant Scorecard & Question Breakdown (`ResultActivity`)
+- Displays animated icon, large **PASSED ✅** (emerald green) or **FAILED ❌** (red) badge.
+- Summary metrics: Score earned, percentage, passing score threshold, total points.
+- Question-by-question review showing candidate's choice, designated right answer, and detailed teacher explanations.
+- "Back to Examination Catalog" button returns smoothly to the exam list.
+
+### 5. 🛡️ In-App Admin Management Studio (`AdminActivity`)
+- Accessible strictly via username **`Admin`** and password **`Admin123`**.
+- **Executive Metric Cards ("show how many use pass")**:
+  - 👥 **TOTAL USERS**: Count of registered candidates.
+  - 📝 **TOTAL ATTEMPTS**: Total examination sittings.
+  - 🏆 **USERS PASSED**: Big green counter showing count of passed attempts.
+  - ⚠️ **USERS FAILED**: Big red counter showing count of failed attempts.
+  - 📈 **PASS RATE %**: Dynamic overall pass percentage.
+- **Exam Submissions & Pass Records Table**:
+  - Candidate Name, Phone Number, Exam Title, Score %, and **PASSED ✅** / **FAILED ❌** badges with submission timestamps.
+- **Registered Users List**:
+  - Full Name, Phone, Registered Date, Exams Taken, Exams Passed, and Status.
+- **Question & Right Answer Studio**:
+  - View all questions by exam track.
+  - **1-Click Right Answer Switcher**: Tap any option row on mobile to instantly designate it as the correct answer with immediate green highlight and database sync!
 
 ---
 
